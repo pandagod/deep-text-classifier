@@ -46,15 +46,11 @@ class_weights = pd.Series(Counter([l for _, l in trainset]))
 class_weights = 1/(class_weights/class_weights.mean())
 class_weights = class_weights.to_dict()
 
-print class_weights
-
 vocab = task.read_vocab()
 labels = task.read_labels()
 
 #classes = max(labels.values())+1
 classes = len(labels.classes_)
-
-print classes
 
 vocab_size = task.vocab_size
 
@@ -178,13 +174,7 @@ def train():
 
     # Saves a configuration file that TensorBoard will read during startup.
 
-    for i, (x, y) in enumerate(batch_iterator(task.read_trainset(epochs=3), args.batch_size, 300)):
-      print "x is"
-      print x
-      print "y is"
-      print y
-      print "class weights"
-      print class_weights
+    for i, (x, y) in enumerate(batch_iterator(task.read_trainset(epochs=100), args.batch_size, 300)):
       fd = model.get_feed_data(x, y, class_weights=class_weights)
 
       # import IPython
