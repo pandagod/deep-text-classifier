@@ -42,7 +42,7 @@ checkpoint_path = os.path.join(checkpoint_dir, checkpoint_name)
 # @TODO: move calculation into `task file`
 trainset = task.read_trainset(epochs=1)
 
-class_weights = pd.Series(Counter([np.argmax(l) for _, l in trainset]))
+class_weights = pd.Series(Counter([l for _, l in trainset]))
 class_weights = 1/(class_weights/class_weights.mean())
 class_weights = class_weights.to_dict()
 
