@@ -13,6 +13,7 @@ args = parser.parse_args()
 
 import importlib
 import os
+import errno
 import pickle
 import random
 import time
@@ -40,18 +41,27 @@ checkpoint_path = os.path.join(checkpoint_dir, checkpoint_name)
 
 # @TODO: move calculation into `task file`
 trainset = task.read_trainset(epochs=1)
-class_weights = pd.Series(Counter([l for _, l in trainset]))
+
+class_weights = pd.Series(Counter([np.argmax(l) for _, l in trainset]))
 class_weights = 1/(class_weights/class_weights.mean())
 class_weights = class_weights.to_dict()
+
+print class_weights
 
 vocab = task.read_vocab()
 labels = task.read_labels()
 
-classes = max(labels.values())+1
+#classes = max(labels.values())+1
+classes = len(labels.classes_)
+
+print classes
+
 vocab_size = task.vocab_size
 
-labels_rev = {int(v): k for k, v in labels.items()}
+#labels_rev = {v: k for k, v in labels.tolist()}
 vocab_rev = {int(v): k for k, v in vocab.items()}
+
+#print labels_rev
 
 
 def HAN_model_1(session, restore_only=False):
@@ -66,6 +76,7 @@ def HAN_model_1(session, restore_only=False):
   from HAN_model import HANClassifierModel
 
   is_training = tf.placeholder(dtype=tf.bool, name='is_training')
+  print is_training
 
   cell = BNLSTMCell(80, is_training) # h-h batchnorm LSTMCell
   # cell = GRUCell(30)
@@ -92,7 +103,7 @@ def HAN_model_1(session, restore_only=False):
     print("Reading model parameters from %s" % checkpoint.model_checkpoint_path)
     saver.restore(session, checkpoint.model_checkpoint_path)
   elif restore_only:
-    raise FileNotFoundError("Cannot restore model")
+    print("Cannot restore model")
   else:
     print("Created model with fresh parameters")
     session.run(tf.global_variables_initializer())
@@ -103,7 +114,7 @@ model_fn = HAN_model_1
 
 def decode(ex):
   print('text: ' + '\n'.join([' '.join([vocab_rev.get(wid, '<?>') for wid in sent]) for sent in ex[0]]))
-  print('label: ', labels_rev[ex[1]])
+  print('label: ', labels.transform([ex[1]]))
 
 print('data loaded')
 
@@ -140,8 +151,8 @@ def evaluate(dataset):
     model, _ = model_fn(s, restore_only=True)
     df = ev(s, model, dataset)
   print((df['predictions'] == df['labels']).mean())
-  import IPython
-  IPython.embed()
+  #import IPython
+  #IPython.embed()
 
 
 def train():
@@ -168,6 +179,12 @@ def train():
     # Saves a configuration file that TensorBoard will read during startup.
 
     for i, (x, y) in enumerate(batch_iterator(task.read_trainset(epochs=3), args.batch_size, 300)):
+      print "x is"
+      print x
+      print "y is"
+      print y
+      print "class weights"
+      print class_weights
       fd = model.get_feed_data(x, y, class_weights=class_weights)
 
       # import IPython

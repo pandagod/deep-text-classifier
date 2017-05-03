@@ -1,5 +1,6 @@
 import os
 import pickle
+import numpy as np
 
 train_dir = os.path.join(os.path.curdir, 'yelp')
 data_dir = os.path.join(train_dir, 'data')
@@ -19,6 +20,8 @@ unknown_id = 2
 vocab_size = 50000
 
 def _read_dataset(fn, review_max_sentences=30, sentence_max_length=30, epochs=1):
+  f = open('./y_target.pickle', 'rb')
+  lb = pickle.load(f)
   c = 0
   while 1:
     c += 1
@@ -28,15 +31,15 @@ def _read_dataset(fn, review_max_sentences=30, sentence_max_length=30, epochs=1)
     with open(fn, 'rb') as f:
       try:
         while 1:
-          x, y = pickle.load(f)
+          id, x, y = pickle.load(f)
 
           # clip review to specified max lengths
           x = x[:review_max_sentences]
           x = [sent[:sentence_max_length] for sent in x]
-
-          y -= 1
-          assert y >= 0 and y <= 4
-          yield x, y
+          #y -= 1
+          #assert y >= 0 and y <= 4
+          print np.array(lb.transform([y])[0])
+          yield x, np.array(lb.transform([y])[0])
       except EOFError:
         continue
 
@@ -51,4 +54,7 @@ def read_vocab():
     return pickle.load(f)
 
 def read_labels():
-  return {i: i for i in range(5)}
+  f = open('./y_target.pickle', 'rb')
+  lb = pickle.load(f)
+  return lb
+  #return {i: class_ for class_ in lb.classes_}

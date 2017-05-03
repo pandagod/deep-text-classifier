@@ -1,7 +1,7 @@
 import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("review_path")
-args = parser.parse_args()
+#parser = argparse.ArgumentParser()
+#parser.add_argument("review_path")
+#args = parser.parse_args()
 
 import os
 import ujson as json
@@ -12,14 +12,37 @@ from tqdm import tqdm
 from collections import defaultdict
 import numpy as np
 from yelp import *
+import MySQLdb
+from sklearn import preprocessing
+import sys
 
 en = spacy.load('en')
 en.pipeline = [en.tagger, en.parser]
 
-def read_reviews():
-  with open(args.review_path, 'rb') as f:
-    for line in f:
-      yield json.loads(line)
+#def read_reviews():
+#  with open(args.review_path, 'rb') as f:
+#    for line in f:
+#      yield json.loads(line)
+
+def load_data_from_db():
+  db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
+  cursor = db.cursor()
+  sql = "SELECT sr_number,t1_final,t2_final ,subject,body FROM text_source_data WHERE site in ('EBAY_AU','EBAY_MAIN','EBAY_CA','EBAY_UK') " \
+        "and channel='Email' and body !='eBP Automation Request' and body !='' and t2_final in ('VeRO - CCR','High Risk','Site Features - CCR','Selling Limits - CCR'," \
+        "'Report a Member/Listing','Shipping - CCR','Paying for Items','Advanced Applications','Cancel Transaction','Defect Appeal','Request a Credit'," \
+        "'Account Suspension','Returns','Buyer Protection Case Qs','Account Restriction','eBay Account Information - CCR','Logistics - CCR','eBay Fees - CCR'," \
+        "'Bidding/Buying Items','Selling Performance','Listing Queries - CCR','Seller Risk Management','Completing a Sale - CCR','Buyer Protection Refunds'," \
+        "'Buyer Protect High ASP Claim','Contact Trading Partner - CCR','Buyer Protection Program Qs','Buyer Loyalty Programs','Specialty Selling Approvals') limit 100"
+
+  try:
+    cursor.execute(sql)
+    results = cursor.fetchall()
+
+  except:
+    sys.stdout.write("Error: unable to fecth data" + '\n')
+
+  db.close()
+  return results
 
 def build_word_frequency_distribution():
   path = os.path.join(data_dir, 'word_freq.pickle')
@@ -34,8 +57,8 @@ def build_word_frequency_distribution():
 
   print('building frequency distribution')
   freq = defaultdict(int)
-  for i, review in enumerate(read_reviews()):
-    doc = en.tokenizer(review['text'])
+  for i, review in enumerate(load_data_from_db()):
+    doc = en.tokenizer((review[3]+" "+review[4]).decode('utf8', 'ignore'))
     for token in doc:
       freq[token.orth_] += 1
     if i % 10000 == 0:
@@ -71,13 +94,16 @@ def make_data(split_points=(0.8, 0.94)):
   train_f = open(trainset_fn, 'wb')
   dev_f = open(devset_fn, 'wb')
   test_f = open(testset_fn, 'wb')
+  previous_y = set()
 
   try:
-    for review in tqdm(read_reviews()):
+    for review in tqdm(load_data_from_db()):
       x = []
-      for sent in en(review['text']).sents:
+      for sent in en((review[3]+'. '+review[4]).decode('utf8', 'ignore')).sents:
         x.append([vocab.get(tok.orth_, UNKNOWN) for tok in sent])
-      y = review['stars']
+
+      y = review[1]+'|'+review[2]
+      previous_y.add(y)
 
       r = random.random()
       if r < train_ratio:
@@ -86,9 +112,16 @@ def make_data(split_points=(0.8, 0.94)):
         f = dev_f
       else:
         f = test_f
-      pickle.dump((x, y), f)
+      pickle.dump((review[0],x, y), f)
   except KeyboardInterrupt:
     pass
+
+  lb = preprocessing.LabelEncoder()
+  lb.fit_transform(list(previous_y))
+
+  f = open('./y_target.pickle', 'wb')
+  pickle.dump(lb, f)
+  f.close()
 
   train_f.close()
   dev_f.close()

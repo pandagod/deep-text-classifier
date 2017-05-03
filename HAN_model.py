@@ -164,8 +164,12 @@ class HANClassifierModel():
     }
     if y is not None:
       fd[self.labels] = y
+      print 'take in'
+      for yy in y:
+        print np.argmax(yy)
       if class_weights is not None:
-        fd[self.sample_weights] = [class_weights[yy] for yy in y]
+        fd[self.sample_weights] = [class_weights[np.argmax(yy)] for yy in y]
+        print fd[self.sample_weights]
       else:
         fd[self.sample_weights] = np.ones(shape=[len(x_m)], dtype=np.float32)
     fd[self.is_training] = is_training
