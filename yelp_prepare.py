@@ -27,7 +27,7 @@ en.pipeline = [en.tagger, en.parser]
 def load_data_from_db():
   db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
   cursor = db.cursor()
-  sql = "SELECT sr_number,t1_final,t2_final ,subject,body FROM text_source_data WHERE site in ('EBAY_AU','EBAY_MAIN','EBAY_CA','EBAY_UK') " \
+  sql = "SELECT distinct(sr_number),t1_final,t2_final ,subject,body FROM text_source_data WHERE site in ('EBAY_AU','EBAY_MAIN','EBAY_CA','EBAY_UK') " \
         "and channel='Email' and body !='eBP Automation Request' and body !='' and t2_final in ('VeRO - CCR','High Risk','Site Features - CCR','Selling Limits - CCR'," \
         "'Report a Member/Listing','Shipping - CCR','Paying for Items','Advanced Applications','Cancel Transaction','Defect Appeal','Request a Credit'," \
         "'Account Suspension','Returns','Buyer Protection Case Qs','Account Restriction','eBay Account Information - CCR','Logistics - CCR','eBay Fees - CCR'," \
@@ -97,7 +97,7 @@ def make_data(split_points=(0.8, 0.94)):
   previous_y = set()
 
   try:
-    for review in tqdm(load_data_from_db()):
+    for review in tqdm(random.shuffle(load_data_from_db())):
       x = []
       for sent in en((review[3]+'. '+review[4]).decode('utf8', 'ignore')).sents:
         x.append([vocab.get(tok.orth_, UNKNOWN) for tok in sent])
