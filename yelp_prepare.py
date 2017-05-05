@@ -97,7 +97,7 @@ def make_data(split_points=(0.8, 0.94)):
   previous_y = set()
 
   try:
-    for review in tqdm(random.shuffle(load_data_from_db())):
+    for review in tqdm(random.shuffle(list(load_data_from_db()))):
       x = []
       for sent in en((review[3]+'. '+review[4]).decode('utf8', 'ignore')).sents:
         x.append([vocab.get(tok.orth_, UNKNOWN) for tok in sent])

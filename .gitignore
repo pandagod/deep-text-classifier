@@ -23,6 +23,7 @@ var/
 data/
 tflog/
 yelp/
+.yelp/
 *.egg-info/
 .installed.cfg
 *.egg
