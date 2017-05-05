@@ -32,7 +32,7 @@ def load_data_from_db():
         "'Report a Member/Listing','Shipping - CCR','Paying for Items','Advanced Applications','Cancel Transaction','Defect Appeal','Request a Credit'," \
         "'Account Suspension','Returns','Buyer Protection Case Qs','Account Restriction','eBay Account Information - CCR','Logistics - CCR','eBay Fees - CCR'," \
         "'Bidding/Buying Items','Selling Performance','Listing Queries - CCR','Seller Risk Management','Completing a Sale - CCR','Buyer Protection Refunds'," \
-        "'Buyer Protect High ASP Claim','Contact Trading Partner - CCR','Buyer Protection Program Qs','Buyer Loyalty Programs','Specialty Selling Approvals') limit 100"
+        "'Buyer Protect High ASP Claim','Contact Trading Partner - CCR','Buyer Protection Program Qs','Buyer Loyalty Programs','Specialty Selling Approvals')"
 
   try:
     cursor.execute(sql)
