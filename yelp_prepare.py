@@ -27,12 +27,12 @@ en.pipeline = [en.tagger, en.parser]
 def load_data_from_db():
   db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
   cursor = db.cursor()
-  sql = "SELECT distinct(sr_number),t1_final,t2_final ,subject,body FROM text_source_data WHERE site in ('EBAY_AU','EBAY_MAIN','EBAY_CA','EBAY_UK') " \
+  sql = "SELECT distinct(sr_number),t1_final,t2_final,subject,body FROM text_source_data WHERE site in ('EBAY_AU','EBAY_MAIN','EBAY_CA','EBAY_UK') " \
         "and channel='Email' and body !='eBP Automation Request' and body !='' and t2_final in ('VeRO - CCR','High Risk','Site Features - CCR','Selling Limits - CCR'," \
         "'Report a Member/Listing','Shipping - CCR','Paying for Items','Advanced Applications','Cancel Transaction','Defect Appeal','Request a Credit'," \
         "'Account Suspension','Returns','Buyer Protection Case Qs','Account Restriction','eBay Account Information - CCR','Logistics - CCR','eBay Fees - CCR'," \
         "'Bidding/Buying Items','Selling Performance','Listing Queries - CCR','Seller Risk Management','Completing a Sale - CCR','Buyer Protection Refunds'," \
-        "'Buyer Protect High ASP Claim','Contact Trading Partner - CCR','Buyer Protection Program Qs','Buyer Loyalty Programs','Specialty Selling Approvals')"
+        "'Buyer Protect High ASP Claim','Contact Trading Partner - CCR','Buyer Protection Program Qs','Buyer Loyalty Programs','Specialty Selling Approvals') limit 100"
 
   try:
     cursor.execute(sql)
@@ -97,7 +97,9 @@ def make_data(split_points=(0.8, 0.94)):
   previous_y = set()
 
   try:
-    for review in tqdm(random.shuffle(list(load_data_from_db()))):
+    source = list(load_data_from_db())
+    random.shuffle(source)
+    for review in tqdm(source):
       x = []
       for sent in en((review[3]+'. '+review[4]).decode('utf8', 'ignore')).sents:
         x.append([vocab.get(tok.orth_, UNKNOWN) for tok in sent])
