@@ -38,7 +38,6 @@ def _read_dataset(fn, review_max_sentences=30, sentence_max_length=30, epochs=1)
           x = [sent[:sentence_max_length] for sent in x]
           #y -= 1
           #assert y >= 0 and y <= 4
-          print np.array(lb.transform([y])[0])
           yield x, lb.transform([y])[0]
       except EOFError:
         continue

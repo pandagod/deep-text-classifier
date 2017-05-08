@@ -15,6 +15,8 @@ from yelp import *
 import MySQLdb
 from sklearn import preprocessing
 import sys
+import re
+from bs4 import BeautifulSoup
 
 en = spacy.load('en')
 en.pipeline = [en.tagger, en.parser]
@@ -24,15 +26,45 @@ en.pipeline = [en.tagger, en.parser]
 #    for line in f:
 #      yield json.loads(line)
 
+def punct_space(token):
+    return token.is_punct or token.is_stop or token.is_space
+
+def stop_word(token):
+    return token.is_stop
+
+def preparation(corpus):
+    return [token.lemma_ for token in en(BeautifulSoup(corpus,"html.parser").get_text())]
+
+def clean_str(string):
+    """
+    Tokenization/string cleaning for all datasets except for SST.
+    Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
+    """
+    #string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
+    string = re.sub(r"\'s", " \'s", string)
+    string = re.sub(r"\'ve", " \'ve", string)
+    string = re.sub(r"n\'t", " n\'t", string)
+    string = re.sub(r"\'re", " \'re", string)
+    string = re.sub(r"\'d", " \'d", string)
+    string = re.sub(r"\'ll", " \'ll", string)
+    string = re.sub(r",", " , ", string)
+    string = re.sub(r"!", " ! ", string)
+    string = re.sub(r"\(", " \( ", string)
+    string = re.sub(r"\)", " \) ", string)
+    string = re.sub(r"\?", " \? ", string)
+    string = re.sub(r"\s{2,}", " ", string)
+    string = string.strip().lower()
+    return string
+
+
+
 def load_data_from_db():
   db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
   cursor = db.cursor()
-  sql = "SELECT distinct(sr_number),t1_final,t2_final,subject,body FROM text_source_data WHERE site in ('EBAY_AU','EBAY_MAIN','EBAY_CA','EBAY_UK') " \
-        "and channel='Email' and body !='eBP Automation Request' and body !='' and t2_final in ('VeRO - CCR','High Risk','Site Features - CCR','Selling Limits - CCR'," \
-        "'Report a Member/Listing','Shipping - CCR','Paying for Items','Advanced Applications','Cancel Transaction','Defect Appeal','Request a Credit'," \
-        "'Account Suspension','Returns','Buyer Protection Case Qs','Account Restriction','eBay Account Information - CCR','Logistics - CCR','eBay Fees - CCR'," \
-        "'Bidding/Buying Items','Selling Performance','Listing Queries - CCR','Seller Risk Management','Completing a Sale - CCR','Buyer Protection Refunds'," \
-        "'Buyer Protect High ASP Claim','Contact Trading Partner - CCR','Buyer Protection Program Qs','Buyer Loyalty Programs','Specialty Selling Approvals')"
+  sql = "SELECT DISTINCT(sr_number),t1_final,t2_final ,subject,body FROM nice_text_source_data WHERE t2_final in ('VeRO - CCR','High Risk','Defect Appeal'," \
+        "'Buyer Protection Case Qs','Paying for Items','Bidding/Buying Items','Account Restriction','Report a Member/Listing','Selling Limits - CCR','Seller Risk Management'," \
+        "'Logistics - CCR','eBay Account Information - CCR','Buyer Protect High ASP Claim','Cancel Transaction','Account Suspension','Buyer Protection Appeal SNAD'," \
+        "'Selling Performance','Buyer Protection Escalate INR','Listing Queries - CCR','Site Features - CCR','Buyer Protection Appeal INR','Shipping - CCR') ORDER BY RAND()"
 
   try:
     cursor.execute(sql)
@@ -58,7 +90,9 @@ def build_word_frequency_distribution():
   print('building frequency distribution')
   freq = defaultdict(int)
   for i, review in enumerate(load_data_from_db()):
-    doc = en.tokenizer((review[3]+" "+review[4]).decode('utf8', 'ignore'))
+    doc = en.tokenizer((clean_str(review[3]+". "+review[4])).decode('utf8', 'ignore'))
+    print "view doc"
+    print doc
     for token in doc:
       freq[token.orth_] += 1
     if i % 10000 == 0:
@@ -101,7 +135,7 @@ def make_data(split_points=(0.8, 0.94)):
     random.shuffle(source)
     for review in tqdm(source):
       x = []
-      for sent in en((review[3]+'. '+review[4]).decode('utf8', 'ignore')).sents:
+      for sent in en((clean_str(review[3]+'. '+review[4])).decode('utf8', 'ignore')).sents:
         x.append([vocab.get(tok.orth_, UNKNOWN) for tok in sent])
 
       y = review[1]+'|'+review[2]
