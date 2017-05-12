@@ -2,7 +2,7 @@ import os
 import pickle
 import numpy as np
 
-train_dir = os.path.join(os.path.curdir, 'yelp')
+train_dir = os.path.join(os.path.curdir, './yelp')
 data_dir = os.path.join(train_dir, 'data')
 
 for dir in [train_dir, data_dir]:
