@@ -3,8 +3,8 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--task', default='yelp', choices=['yelp'])
 parser.add_argument('--mode', default='train', choices=['train', 'eval'])
-parser.add_argument('--checkpoint-frequency', type=int, default=100)
-parser.add_argument('--eval-frequency', type=int, default=10000)
+parser.add_argument('--checkpoint-frequency', type=int, default=4)
+parser.add_argument('--eval-frequency', type=int, default=200)
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
@@ -147,6 +147,8 @@ def evaluate(dataset):
     model, _ = model_fn(s, restore_only=True)
     df = ev(s, model, dataset)
   print((df['predictions'] == df['labels']).mean())
+  print df['predictions']
+  print df['labels']
   #import IPython
   #IPython.embed()
 

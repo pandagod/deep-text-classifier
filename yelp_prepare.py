@@ -4,7 +4,6 @@ import argparse
 #args = parser.parse_args()
 
 import os
-import ujson as json
 import spacy
 import pickle
 import random
