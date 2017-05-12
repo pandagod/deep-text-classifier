@@ -3,8 +3,8 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--task', default='yelp', choices=['yelp'])
 parser.add_argument('--mode', default='train', choices=['train', 'eval'])
-parser.add_argument('--checkpoint-frequency', type=int, default=4)
-parser.add_argument('--eval-frequency', type=int, default=200)
+parser.add_argument('--checkpoint-frequency', type=int, default=100)
+parser.add_argument('--eval-frequency', type=int, default=100)
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
@@ -134,7 +134,7 @@ def ev(session, model, dataset):
   for x, y in tqdm(batch_iterator(dataset, args.batch_size, 1)):
     examples.extend(x)
     labels.extend(y)
-    predictions.extend(session.run(model.prediction, model.get_feed_data(x, is_training=False)))
+    predictions.extend(session.run(model.logits, model.get_feed_data(x, is_training=False)))
 
   df = pd.DataFrame({'predictions': predictions, 'labels': labels, 'examples': examples})
   return df
@@ -190,8 +190,8 @@ def train():
           model.accuracy,
           model.train_op,
       ], fd)
-      td = time.clock() - t0
 
+      td = time.clock() - t0
       summary_writer.add_summary(summaries, global_step=step)
       # projector.visualize_embeddings(summary_writer, pconf)
 
