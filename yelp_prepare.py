@@ -90,8 +90,6 @@ def build_word_frequency_distribution():
   freq = defaultdict(int)
   for i, review in enumerate(load_data_from_db()):
     doc = en.tokenizer((clean_str(review[3]+". "+review[4])).decode('utf8', 'ignore'))
-    print "view doc"
-    print doc
     for token in doc:
       freq[token.orth_] += 1
     if i % 10000 == 0:
