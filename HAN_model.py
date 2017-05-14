@@ -153,7 +153,7 @@ class HANClassifierModel():
         self.logits = layers.fully_connected(
           sentence_level_output, self.classes, activation_fn=None)
 
-        self.prediction = tf.argmax(self.logits, axis=-1)
+        self.prediction = tf.argmax(self.logits, axis=1)
 
   def get_feed_data(self, x, y=None, class_weights=None, is_training=True):
     x_m, doc_sizes, sent_sizes = data_util.batch(x)
