@@ -16,6 +16,7 @@ from sklearn import preprocessing
 import sys
 import re
 from bs4 import BeautifulSoup
+from langdetect import detect
 
 en = spacy.load('en')
 en.pipeline = [en.tagger, en.parser]
@@ -40,30 +41,17 @@ def clean_str(string):
     Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     """
     #string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
-    string = re.sub(r"\'s", " \'s", string)
-    string = re.sub(r"\'ve", " \'ve", string)
-    string = re.sub(r"n\'t", " n\'t", string)
-    string = re.sub(r"\'re", " \'re", string)
-    string = re.sub(r"\'d", " \'d", string)
-    string = re.sub(r"\'ll", " \'ll", string)
-    string = re.sub(r",", " , ", string)
-    string = re.sub(r"!", " ! ", string)
-    string = re.sub(r"\(", " \( ", string)
-    string = re.sub(r"\)", " \) ", string)
-    string = re.sub(r"\?", " \? ", string)
-    string = re.sub(r"\s{2,}", " ", string)
     string = string.strip().lower()
     return string
-
-
 
 def load_data_from_db():
   db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
   cursor = db.cursor()
-  sql = "SELECT DISTINCT(sr_number),t1_final,t2_final ,subject,body FROM nice_text_source_data WHERE t2_final in ('VeRO - CCR','High Risk','Defect Appeal'," \
-        "'Buyer Protection Case Qs','Paying for Items','Bidding/Buying Items','Account Restriction','Report a Member/Listing','Selling Limits - CCR','Seller Risk Management'," \
-        "'Logistics - CCR','eBay Account Information - CCR','Buyer Protect High ASP Claim','Cancel Transaction','Account Suspension','Buyer Protection Appeal SNAD'," \
-        "'Selling Performance','Buyer Protection Escalate INR','Listing Queries - CCR','Site Features - CCR','Buyer Protection Appeal INR','Shipping - CCR') ORDER BY RAND()"
+  sql = "SELECT DISTINCT(sr_number),t1_final,t2_final ,subject,body FROM nice_text_source_data WHERE t2_final in ('Defect Appeal' \
+          'High Risk','Site Features - CCR','Selling Performance','VeRO - CCR','Bidding/Buying Items','Report a Member/Listing','Account Restriction' \
+          'Cancel Transaction','Logistics - CCR','Selling Limits - CCR','Listing Queries - CCR','Paying for Items','Seller Risk Management'," \
+          "'eBay Account Information - CCR','Shipping - CCR','Account Suspension','Buyer Protection Case Qs','Buyer Protect High ASP Claim'" \
+          ",'Buyer Protection Appeal INR','eBay Fees - CCR','Completing a Sale - CCR') ORDER BY RAND() limit 10"
 
   try:
     cursor.execute(sql)
@@ -89,13 +77,21 @@ def build_word_frequency_distribution():
   print('building frequency distribution')
   freq = defaultdict(int)
   for i, review in enumerate(load_data_from_db()):
-    doc = en.tokenizer((clean_str(review[3]+". "+review[4])).decode('utf8', 'ignore'))
-    for token in doc:
-      freq[token.orth_] += 1
-    if i % 10000 == 0:
-      with open(path, 'wb') as freq_dist_f:
-        pickle.dump(freq, freq_dist_f)
-      print('dump at {}'.format(i))
+      try:
+          text = review[3]+". "+review[4]
+          if text != '' and detect(text) == 'en':
+            for sent in en(text.decode('utf8', 'ignore')).sents:
+                for token in en(clean_str(sent.text)):
+                    freq[token.orth_] += 1
+            #doc = en.tokenizer((clean_str(text)).decode('utf8', 'ignore'))
+            #for token in doc:
+            #  freq[token.orth_] += 1
+            if i % 10000 == 0:
+              with open(path, 'wb') as freq_dist_f:
+                pickle.dump(freq, freq_dist_f)
+              print('dump at {}'.format(i))
+      except:
+          print text
   return freq
 
 def build_vocabulary(lower=3, n=50000):
@@ -119,7 +115,7 @@ def build_vocabulary(lower=3, n=50000):
 
 UNKNOWN = 2
 
-def make_data(split_points=(0.8, 0.94)):
+def make_data(split_points=(0.9, 0.95)):
   train_ratio, dev_ratio = split_points
   vocab = build_vocabulary()
   train_f = open(trainset_fn, 'wb')
@@ -131,21 +127,28 @@ def make_data(split_points=(0.8, 0.94)):
     source = list(load_data_from_db())
     random.shuffle(source)
     for review in tqdm(source):
-      x = []
-      for sent in en((clean_str(review[3]+'. '+review[4])).decode('utf8', 'ignore')).sents:
-        x.append([vocab.get(tok.orth_, UNKNOWN) for tok in sent])
+      text = review[3]+'. '+review[4]
+      try:
+          if text!='' and detect(text)=='en':
+              x = []
+              for sent in en(text.decode('utf8', 'ignore')).sents:
+                  x.append([vocab.get(tok.orth_, UNKNOWN) for tok in en(clean_str(sent.text))])
+              #for sent in en(clean_str(review[3]+'. '+review[4]).decode('utf8', 'ignore')).sents:
+                #x.append([vocab.get(tok.orth_, UNKNOWN) for tok in sent])
 
-      y = review[1]+'|'+review[2]
-      previous_y.add(y)
+              y = review[1]+'|'+review[2]
+              previous_y.add(y)
 
-      r = random.random()
-      if r < train_ratio:
-        f = train_f
-      elif r < dev_ratio:
-        f = dev_f
-      else:
-        f = test_f
-      pickle.dump((review[0],x, y), f)
+              r = random.random()
+              if r < train_ratio:
+                f = train_f
+              elif r < dev_ratio:
+                f = dev_f
+              else:
+                f = test_f
+              pickle.dump((review[0],x, y), f)
+      except:
+          print text
   except KeyboardInterrupt:
     pass
 

@@ -8,7 +8,7 @@ parser.add_argument('--eval-frequency', type=int, default=100)
 parser.add_argument('--batch-size', type=int, default=256)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
-parser.add_argument("--lr", type=float, default=0.001)
+parser.add_argument("--lr", type=float, default=0.0001)
 args = parser.parse_args()
 
 import importlib
@@ -72,7 +72,6 @@ def HAN_model_1(session, restore_only=False):
   from HAN_model import HANClassifierModel
 
   is_training = tf.placeholder(dtype=tf.bool, name='is_training')
-  print is_training
 
   cell = BNLSTMCell(80, is_training) # h-h batchnorm LSTMCell
   # cell = GRUCell(30)
@@ -86,11 +85,11 @@ def HAN_model_1(session, restore_only=False):
       sentence_cell=cell,
       word_output_size=100,
       sentence_output_size=100,
-      device=args.device,
-      learning_rate=args.lr,
       max_grad_norm=args.max_grad_norm,
       dropout_keep_proba=0.5,
       is_training=is_training,
+      learning_rate=args.lr,
+      device=args.device,
   )
 
   saver = tf.train.Saver(tf.global_variables())
@@ -134,7 +133,7 @@ def ev(session, model, dataset):
   for x, y in tqdm(batch_iterator(dataset, args.batch_size, 1)):
     examples.extend(x)
     labels.extend(y)
-    predictions.extend(session.run(model.logits, model.get_feed_data(x, is_training=False)))
+    predictions.extend(session.run(model.prediction, model.get_feed_data(x, is_training=False)))
 
   df = pd.DataFrame({'predictions': predictions, 'labels': labels, 'examples': examples})
   return df
