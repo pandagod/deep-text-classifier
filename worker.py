@@ -190,7 +190,6 @@ def train():
       ], fd)
 
       print('evaluation at step %s' % step)
-
       print('dev accuracy: %.2f' % accuracy)
       dev_summary_writer.add_summary(summaries, global_step=step)
 
