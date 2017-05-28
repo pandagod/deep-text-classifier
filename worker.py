@@ -178,15 +178,11 @@ def train():
       td = time.clock() - t0
       print('step %s, loss=%s, accuracy=%s, t=%s, inputs=%s' % (step, loss, accuracy, round(td, 2), fd[model.inputs].shape))
       train_summary_writer.add_summary(summaries, global_step=step)
-      if step != 0 and step % args.checkpoint_frequency == 0:
-        print('checkpoint & graph meta')
-        saver.save(s, checkpoint_path, global_step=step)
-        print('checkpoint done')
 
-    def dev_step(x,y, writer=None):
+    def dev_step(x,y):
       fd = model.get_feed_data(x, y, class_weights=class_weights,dropout_keep_proba=1)
       t0 = time.clock()
-      step, summaries, loss, accuracy, _ = s.run([
+      step, summaries, loss, accuracy = s.run([
         model.global_step,
         model.summary_op,
         model.loss,
@@ -195,7 +191,7 @@ def train():
 
       print('evaluation at step %s' % step)
 
-      print('dev accuracy: %.2f' % (accuracy))
+      print('dev accuracy: %.2f' % accuracy)
       dev_summary_writer.add_summary(summaries, global_step=step)
 
     for i, (x, y) in enumerate(batch_iterator(task.read_trainset(epochs=90), args.batch_size, 300)):
@@ -207,7 +203,7 @@ def train():
         print('checkpoint done')
       if current_step != 0 and current_step % args.eval_frequency == 0:
         for x, y in tqdm(batch_iterator(task.read_devset(epochs=1), args.batch_size, 1)):
-          dev_step(x,y,dev_summary_writer)
+          dev_step(x,y)
 
 def main():
   if args.mode == 'train':
