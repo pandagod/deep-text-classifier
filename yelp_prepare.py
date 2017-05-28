@@ -51,7 +51,7 @@ def load_data_from_db():
           'High Risk','Site Features - CCR','Selling Performance','VeRO - CCR','Bidding/Buying Items','Report a Member/Listing','Account Restriction' \
           'Cancel Transaction','Logistics - CCR','Selling Limits - CCR','Listing Queries - CCR','Paying for Items','Seller Risk Management'," \
           "'eBay Account Information - CCR','Shipping - CCR','Account Suspension','Buyer Protection Case Qs','Buyer Protect High ASP Claim'" \
-          ",'Buyer Protection Appeal INR','eBay Fees - CCR','Completing a Sale - CCR') ORDER BY RAND() limit 10"
+          ",'Buyer Protection Appeal INR','eBay Fees - CCR','Completing a Sale - CCR') ORDER BY RAND()"
 
   try:
     cursor.execute(sql)
@@ -147,6 +147,7 @@ def make_data(split_points=(0.9, 0.95)):
               else:
                 f = test_f
               pickle.dump((review[0],x, y), f)
+
       except:
           print text
   except KeyboardInterrupt:

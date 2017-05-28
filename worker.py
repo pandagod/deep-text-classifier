@@ -3,9 +3,9 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--task', default='yelp', choices=['yelp'])
 parser.add_argument('--mode', default='train', choices=['train', 'eval'])
-parser.add_argument('--checkpoint-frequency', type=int, default=100)
-parser.add_argument('--eval-frequency', type=int, default=100)
-parser.add_argument('--batch-size', type=int, default=256)
+parser.add_argument('--checkpoint-frequency', type=int, default=10)
+parser.add_argument('--eval-frequency', type=int, default=10)
+parser.add_argument('--batch-size', type=int, default=128)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
 parser.add_argument("--lr", type=float, default=0.0001)
@@ -86,8 +86,7 @@ def HAN_model_1(session, restore_only=False):
       word_output_size=100,
       sentence_output_size=100,
       max_grad_norm=args.max_grad_norm,
-      dropout_keep_proba=0.5,
-      is_training=is_training,
+      is_training =is_training,
       learning_rate=args.lr,
       device=args.device,
   )
@@ -125,7 +124,6 @@ def batch_iterator(dataset, batch_size, max_epochs):
         yield xb, yb
         xb, yb = [], []
 
-
 def ev(session, model, dataset):
   predictions = []
   labels = []
@@ -133,11 +131,10 @@ def ev(session, model, dataset):
   for x, y in tqdm(batch_iterator(dataset, args.batch_size, 1)):
     examples.extend(x)
     labels.extend(y)
-    predictions.extend(session.run(model.prediction, model.get_feed_data(x, is_training=False)))
+    predictions.extend(session.run(model.prediction, model.get_feed_data(x, dropout_keep_proba=1)))
 
   df = pd.DataFrame({'predictions': predictions, 'labels': labels, 'examples': examples})
   return df
-
 
 def evaluate(dataset):
   tf.reset_default_graph()
@@ -151,7 +148,6 @@ def evaluate(dataset):
   #import IPython
   #IPython.embed()
 
-
 def train():
   tf.reset_default_graph()
 
@@ -159,57 +155,65 @@ def train():
 
   with tf.Session(config=config) as s:
     model, saver = model_fn(s)
-    summary_writer = tf.summary.FileWriter(tflog_dir, graph=tf.get_default_graph())
+    train_summary_dir = os.path.join(tflog_dir,"train")
+    train_summary_writer = tf.summary.FileWriter(train_summary_dir, graph=tf.get_default_graph())
 
-    # Format: tensorflow/contrib/tensorboard/plugins/projector/projector_config.proto
-    # pconf = projector.ProjectorConfig()
+    dev_summary_dir = os.path.join(tflog_dir,"dev")
+    dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, graph=tf.get_default_graph())
 
-    # # You can add multiple embeddings. Here we add only one.
-    # embedding = pconf.embeddings.add()
-    # embedding.tensor_name = m.embedding_matrix.name
+    global_step = model.global_step
 
-    # # Link this tensor to its metadata file (e.g. labels).
-    # embedding.metadata_path = vocab_tsv
+    def train_step(x, y):
 
-    # print(embedding.tensor_name)
-
-    # Saves a configuration file that TensorBoard will read during startup.
-
-    for i, (x, y) in enumerate(batch_iterator(task.read_trainset(epochs=100), args.batch_size, 300)):
-      fd = model.get_feed_data(x, y, class_weights=class_weights)
-
-      # import IPython
-      # IPython.embed()
-
+      fd = model.get_feed_data(x, y, class_weights=class_weights,dropout_keep_proba=0.5)
       t0 = time.clock()
       step, summaries, loss, accuracy, _ = s.run([
-          model.global_step,
-          model.summary_op,
-          model.loss,
-          model.accuracy,
-          model.train_op,
+        model.global_step,
+        model.summary_op,
+        model.loss,
+        model.accuracy,
+        model.train_op,
       ], fd)
 
       td = time.clock() - t0
-      summary_writer.add_summary(summaries, global_step=step)
-      # projector.visualize_embeddings(summary_writer, pconf)
-
-      if step % 1 == 0:
-        print('step %s, loss=%s, accuracy=%s, t=%s, inputs=%s' % (step, loss, accuracy, round(td, 2), fd[model.inputs].shape))
+      print('step %s, loss=%s, accuracy=%s, t=%s, inputs=%s' % (step, loss, accuracy, round(td, 2), fd[model.inputs].shape))
+      train_summary_writer.add_summary(summaries, global_step=step)
       if step != 0 and step % args.checkpoint_frequency == 0:
         print('checkpoint & graph meta')
         saver.save(s, checkpoint_path, global_step=step)
         print('checkpoint done')
-      if step != 0 and step % args.eval_frequency == 0:
-        print('evaluation at step %s' % i)
-        dev_df = ev(s, model, task.read_devset(epochs=1))
-        print('dev accuracy: %.2f' % (dev_df['predictions'] == dev_df['labels']).mean())
+
+    def dev_step(x,y, writer=None):
+      fd = model.get_feed_data(x, y, class_weights=class_weights,dropout_keep_proba=1)
+      t0 = time.clock()
+      step, summaries, loss, accuracy, _ = s.run([
+        model.global_step,
+        model.summary_op,
+        model.loss,
+        model.accuracy
+      ], fd)
+
+      print('evaluation at step %s' % step)
+
+      print('dev accuracy: %.2f' % (accuracy))
+      dev_summary_writer.add_summary(summaries, global_step=step)
+
+    for i, (x, y) in enumerate(batch_iterator(task.read_trainset(epochs=90), args.batch_size, 300)):
+      train_step(x,y)
+      current_step =tf.train.global_step(s,global_step)
+      if current_step != 0 and current_step % args.checkpoint_frequency == 0:
+        print('checkpoint & graph meta')
+        saver.save(s, checkpoint_path, global_step=current_step)
+        print('checkpoint done')
+      if current_step != 0 and current_step % args.eval_frequency == 0:
+        for x, y in tqdm(batch_iterator(task.read_devset(epochs=1), args.batch_size, 1)):
+          dev_step(x,y,dev_summary_writer)
 
 def main():
   if args.mode == 'train':
     train()
   elif args.mode == 'eval':
-    evaluate(task.read_devset(epochs=1))
+    evaluate(task.read_testset(epochs=1))
 
 if __name__ == '__main__':
   main()

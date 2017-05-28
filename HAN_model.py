@@ -19,7 +19,6 @@ class HANClassifierModel():
                word_output_size,
                sentence_output_size,
                max_grad_norm,
-               dropout_keep_proba,
                is_training=None,
                learning_rate=1e-4,
                device='/cpu:0',
@@ -32,7 +31,6 @@ class HANClassifierModel():
     self.sentence_cell = sentence_cell
     self.sentence_output_size = sentence_output_size
     self.max_grad_norm = max_grad_norm
-    self.dropout_keep_proba = dropout_keep_proba
 
     with tf.variable_scope(scope or 'tcm') as scope:
       self.global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -40,8 +38,9 @@ class HANClassifierModel():
       if is_training is not None:
         self.is_training = is_training
       else:
-        self.is_training = tf.placeholder(dtype=tf.bool, name='is_training')
+        self.is_training = tf.placeholder(dtype=tf.bool,name='is_training')
 
+      self.dropout_keep_proba = tf.placeholder(dtype=tf.float32, name='dropout_keep_proba')
       self.sample_weights = tf.placeholder(shape=(None,), dtype=tf.float32, name='sample_weights')
 
       # [document x sentence x word]
@@ -89,6 +88,7 @@ class HANClassifierModel():
         global_step=self.global_step)
 
       self.summary_op = tf.summary.merge_all()
+      #self.train_summary_op = tf.summary.merge([tf.summary.scalar('loss')])
 
   def _init_embedding(self, scope):
     with tf.variable_scope(scope):
@@ -126,8 +126,7 @@ class HANClassifierModel():
 
         with tf.variable_scope('dropout'):
           word_level_output = layers.dropout(
-            word_level_output, keep_prob=self.dropout_keep_proba,
-            is_training=self.is_training,
+            word_level_output, keep_prob=self.dropout_keep_proba
           )
 
       # sentence_level
@@ -145,8 +144,7 @@ class HANClassifierModel():
 
         with tf.variable_scope('dropout'):
           sentence_level_output = layers.dropout(
-            sentence_level_output, keep_prob=self.dropout_keep_proba,
-            is_training=self.is_training,
+            sentence_level_output, keep_prob=self.dropout_keep_proba
           )
 
       with tf.variable_scope('classifier'):
@@ -155,12 +153,13 @@ class HANClassifierModel():
 
         self.prediction = tf.argmax(self.logits, axis=1)
 
-  def get_feed_data(self, x, y=None, class_weights=None, is_training=True):
+  def get_feed_data(self, x, y=None, class_weights=None, is_training=True,dropout_keep_proba=1):
     x_m, doc_sizes, sent_sizes = data_util.batch(x)
     fd = {
       self.inputs: x_m,
       self.sentence_lengths: doc_sizes,
       self.word_lengths: sent_sizes,
+      self.dropout_keep_proba:dropout_keep_proba
     }
     if y is not None:
       fd[self.labels] = y
