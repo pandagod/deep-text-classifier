@@ -91,7 +91,7 @@ def build_word_frequency_distribution():
                 pickle.dump(freq, freq_dist_f)
               print('dump at {}'.format(i))
       except:
-          print text
+          print review[0]
   return freq
 
 def build_vocabulary(lower=3, n=50000):
@@ -103,7 +103,7 @@ def build_vocabulary(lower=3, n=50000):
   except IOError:
     print('building vocabulary')
   freq = build_word_frequency_distribution()
-  top_words = list(sorted(freq.items(), key=lambda x: -x[1]))[:n-lower+1]
+  top_words = list(sorted(freq.items(), key=lambda x: -x[1]))[:n-lower-1]
   vocab = {}
   i = lower
   for w, freq in top_words:

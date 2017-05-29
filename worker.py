@@ -201,8 +201,12 @@ def train():
         saver.save(s, checkpoint_path, global_step=current_step)
         print('checkpoint done')
       if current_step != 0 and current_step % args.eval_frequency == 0:
+        dev_labels = []
+        dev_examples = []
         for x, y in tqdm(batch_iterator(task.read_devset(epochs=1), args.batch_size, 1)):
-          dev_step(x,y)
+          dev_examples.extend(x)
+          dev_labels.extend(y)
+        dev_step(dev_examples,dev_labels)
 
 def main():
   if args.mode == 'train':
