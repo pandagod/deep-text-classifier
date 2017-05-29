@@ -35,14 +35,7 @@ def clean_str(string):
     return string
 
 def test():
-    example="Regarding: BBB Customer Review for eBay Inc.Dear Complaints BBB,A consumer has submitted a BBB Customer Review for your business, " \
-            "which will be posted on your BBB Business Review.These reviews may be listed as positive, neutral or negative. Please note that negative " \
-            "reviews are not formal complaints, and reviews do not affect your BBB Rating. If the customer has filed a formal complaint regarding the same " \
-            "experience, the review will not be posted. What you can do:If the review meets BBB's guidelines, it will be posted on your BBB Business Review " \
-            "after 5 days or after you have submitted a comment. You are welcome to submit a response that will appear alongside the review. To read the review " \
-            "and submit a comment, please click on the following link:http://www.bbb.org/losangelessiliconvalley/customer-reviews/ac/10673/576a9178fde2444d .How it " \
-            "works:*   BBB's Customer Reviews deliver a more accurate approach to customer feedback."\
-            "*   Reviews cannot be submitted anonymously. They are authenticated by confirming the email address of the reviewer.*   Reviews are sent"
+    example="Sent:	2016-10-05 18:10:16.0 Subject:	RE: Regarding the 6tb Sata Iii 6gb, item Enter your response here:	Hi I am getting nowhere with the Global Shipping team and after contacting PayPal (with eBay Rep on the phone) they confirmed my account is and always has been in good standing with absolutely no issues.  At this point I would like your escalation protocols on how to speak directly to a manger or contact information to your legal dept if a manager is not available.Without Prejudice,Richard 4168430842  Previous Message Follows-------------------------   .header{background-color:#f9f9f9;font-family:Helvetica Neue,Helvetica, Arial; Light;font-size:11px;}body{margin:16px;color:#333333;background-color:#f9f9f9;font-family:Helvetica Neue,Helvetica, Arial; Reg;font-size:14px;font-weight:normal;font-style:normal;line-height: 1.2;}#email p{margin: 14px 0;}#email a{color:#0563C1;}.subject{ font-size: 18px; margin: 16px 0 30px 0;}.thanks{margin: 36px 0 90px 0 !important;}.footer{background-color:#FFFFFF;font-family:Helvetica Neue,Helvetica, Arial; Light;font-size:11px;}.info{color:#767676;font-size:12px;font-family:font-family:Helvetica Neue,Helvetica, Arial; Light; }RE: Regarding the 6tb Sata Iii 6gb, item # 331928832470  SR# 1-85213632668Dear Richard, Thank you for reaching back out to us about the refund for the shipping on the 6TB hard drive, item 331928832470. I understand you havent seen in your account. I understand the distress of not s"
     freq = defaultdict(int)
     if example != '' and detect(example.decode('utf8', 'ignore')) == 'en':
         for sent in en(example.decode('utf8', 'ignore')).sents:
