@@ -78,9 +78,9 @@ def build_word_frequency_distribution():
   freq = defaultdict(int)
   for i, review in enumerate(load_data_from_db()):
       try:
-          text = review[3]+". "+review[4]
+          text = (review[3]+". "+review[4]).decode('utf8', 'ignore')
           if text != '' and detect(text) == 'en':
-            for sent in en(text.decode('utf8', 'ignore')).sents:
+            for sent in en(text).sents:
                 for token in en(clean_str(sent.text)):
                     freq[token.orth_] += 1
             #doc = en.tokenizer((clean_str(text)).decode('utf8', 'ignore'))
@@ -127,11 +127,11 @@ def make_data(split_points=(0.9, 0.95)):
     source = list(load_data_from_db())
     random.shuffle(source)
     for review in tqdm(source):
-      text = review[3]+'. '+review[4]
+      text = (review[3]+'. '+review[4]).decode('utf8', 'ignore')
       try:
           if text!='' and detect(text)=='en':
               x = []
-              for sent in en(text.decode('utf8', 'ignore')).sents:
+              for sent in en(text).sents:
                   x.append([vocab.get(tok.orth_, UNKNOWN) for tok in en(clean_str(sent.text))])
               #for sent in en(clean_str(review[3]+'. '+review[4]).decode('utf8', 'ignore')).sents:
                 #x.append([vocab.get(tok.orth_, UNKNOWN) for tok in sent])
@@ -149,7 +149,7 @@ def make_data(split_points=(0.9, 0.95)):
               pickle.dump((review[0],x, y), f)
 
       except:
-          print text
+          print review[0]
   except KeyboardInterrupt:
     pass
 

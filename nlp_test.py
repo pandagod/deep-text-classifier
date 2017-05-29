@@ -44,7 +44,7 @@ def test():
             "works:*   BBB's Customer Reviews deliver a more accurate approach to customer feedback."\
             "*   Reviews cannot be submitted anonymously. They are authenticated by confirming the email address of the reviewer.*   Reviews are sent"
     freq = defaultdict(int)
-    if example != '' and detect(example) == 'en':
+    if example != '' and detect(example.decode('utf8', 'ignore')) == 'en':
         for sent in en(example.decode('utf8', 'ignore')).sents:
             for token in en(clean_str(sent.text)):
                 freq[token.orth_] += 1
