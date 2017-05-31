@@ -36,11 +36,6 @@ def preparation(corpus):
     return [token.lemma_ for token in en(BeautifulSoup(corpus,"html.parser").get_text())]
 
 def clean_str(string):
-    """
-    Tokenization/string cleaning for all datasets except for SST.
-    Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
-    """
-    #string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
     string = string.strip().lower()
     return string
 

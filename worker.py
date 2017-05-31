@@ -124,6 +124,15 @@ def batch_iterator(dataset, batch_size, max_epochs):
         yield xb, yb
         xb, yb = [], []
 
+def dev_iterator(dataset):
+  xb = []
+  yb = []
+  for ex in dataset:
+    x, y = ex
+    xb.append(x)
+    yb.append(y)
+  return (xb,yb)
+
 def ev(session, model, dataset):
   predictions = []
   labels = []
@@ -181,7 +190,6 @@ def train():
 
     def dev_step(x,y):
       fd = model.get_feed_data(x, y, class_weights=class_weights,dropout_keep_proba=1)
-      t0 = time.clock()
       step, summaries, loss, accuracy = s.run([
         model.global_step,
         model.summary_op,
@@ -200,13 +208,10 @@ def train():
         print('checkpoint & graph meta')
         saver.save(s, checkpoint_path, global_step=current_step)
         print('checkpoint done')
-      #if current_step != 0 and current_step % args.eval_frequency == 0:
-        #dev_labels = []
-        #dev_examples = []
-        #for x, y in tqdm(batch_iterator(task.read_devset(epochs=1), args.batch_size, 1)):
-          #dev_examples.extend(x)
-          #dev_labels.extend(y)
-        #dev_step(dev_examples,dev_labels)
+      if current_step != 0 and current_step % args.eval_frequency == 0:
+        dev_accuracies = []
+        x,y = dev_iterator(task.read_devset(epochs=1))
+        dev_step(x,y)
 
 def main():
   if args.mode == 'train':
