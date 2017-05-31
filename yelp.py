@@ -49,6 +49,9 @@ def read_trainset(epochs=1):
 def read_devset(epochs=1):
   return _read_dataset(devset_fn, epochs=epochs)
 
+def read_testset(epochs=1):
+  return _read_dataset(testset_fn, epochs=epochs)
+
 def read_vocab():
   with open(vocab_fn, 'rb') as f:
     return pickle.load(f)
