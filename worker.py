@@ -209,9 +209,8 @@ def train():
         saver.save(s, checkpoint_path, global_step=current_step)
         print('checkpoint done')
       if current_step != 0 and current_step % args.eval_frequency == 0:
-        dev_accuracies = []
-        x,y = dev_iterator(task.read_devset(epochs=1))
-        dev_step(x,y)
+        for x, y in tqdm(batch_iterator(task.read_devset(epochs=1), 512, 1)):
+          dev_step(x,y)
 
 def main():
   if args.mode == 'train':
