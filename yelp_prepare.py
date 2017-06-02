@@ -89,7 +89,7 @@ def build_word_frequency_distribution():
           print review[0]
   return freq
 
-def build_vocabulary(lower=3, n=50000):
+def build_vocabulary(lower=3, n=60000):
   try:
     with open(vocab_fn, 'rb') as vocab_file:
       vocab = pickle.load(vocab_file)
@@ -98,6 +98,8 @@ def build_vocabulary(lower=3, n=50000):
   except IOError:
     print('building vocabulary')
   freq = build_word_frequency_distribution()
+
+  print (len(freq.items()))
   top_words = list(sorted(freq.items(), key=lambda x: -x[1]))[:n-lower-1]
   vocab = {}
   i = lower
