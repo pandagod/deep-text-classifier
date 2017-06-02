@@ -89,7 +89,7 @@ def build_word_frequency_distribution():
           print review[0]
   return freq
 
-def build_vocabulary(lower=3, n=250000):
+def build_vocabulary(lower=3, n=200000):
   try:
     with open(vocab_fn, 'rb') as vocab_file:
       vocab = pickle.load(vocab_file)

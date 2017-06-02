@@ -17,9 +17,9 @@ vocab_fn = os.path.join(data_dir, 'vocab.pickle')
 reserved_tokens = 5
 unknown_id = 2
 
-vocab_size = 250000
+vocab_size = 200000
 
-def _read_dataset(fn, review_max_sentences=100, sentence_max_length=50, epochs=1):
+def _read_dataset(fn, review_max_sentences=70, sentence_max_length=30, epochs=1):
   f = open('./y_target.pickle', 'rb')
   lb = pickle.load(f)
   c = 0
