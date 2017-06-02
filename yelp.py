@@ -32,7 +32,8 @@ def _read_dataset(fn, review_max_sentences=70, sentence_max_length=30, epochs=1)
       try:
         while 1:
           id, x, y = pickle.load(f)
-
+          print len(x)
+          print id
           # clip review to specified max lengths
           x = x[:review_max_sentences]
           x = [sent[:sentence_max_length] for sent in x]

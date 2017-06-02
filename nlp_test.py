@@ -35,8 +35,18 @@ def clean_str(string):
     return string
 
 def test():
-    example="Sent:	2016-10-05 18:10:16.0 Subject:	RE: Regarding the 6tb Sata Iii 6gb, item Enter your response here:	Hi I am getting nowhere with the Global Shipping team and after contacting PayPal (with eBay Rep on the phone) they confirmed my account is and always has been in good standing with absolutely no issues.  At this point I would like your escalation protocols on how to speak directly to a manger or contact information to your legal dept if a manager is not available.Without Prejudice,Richard 4168430842  Previous Message Follows-------------------------   .header{background-color:#f9f9f9;font-family:Helvetica Neue,Helvetica, Arial; Light;font-size:11px;}body{margin:16px;color:#333333;background-color:#f9f9f9;font-family:Helvetica Neue,Helvetica, Arial; Reg;font-size:14px;font-weight:normal;font-style:normal;line-height: 1.2;}#email p{margin: 14px 0;}#email a{color:#0563C1;}.subject{ font-size: 18px; margin: 16px 0 30px 0;}.thanks{margin: 36px 0 90px 0 !important;}.footer{background-color:#FFFFFF;font-family:Helvetica Neue,Helvetica, Arial; Light;font-size:11px;}.info{color:#767676;font-size:12px;font-family:font-family:Helvetica Neue,Helvetica, Arial; Light; }RE: Regarding the 6tb Sata Iii 6gb, item # 331928832470  SR# 1-85213632668Dear Richard, Thank you for reaching back out to us about the refund for the shipping on the 6TB hard drive, item 331928832470. I understand you havent seen in your account. I understand the distress of not s"
+    example=" Здравствуйте,Спасибо что наконец ответили,но у меня ещё остались вопросы и предложения к вам.Я прочитал всё что вы мне " \
+            "прислали,но там я не нашёл решения своей проблемы.Поэтому я хочу предложить вам следующие : Разрешите мне продать мой первый " \
+            "товар за сумму 7500$ и вы убедитесь что я честный и порядочный продавец,и что наше дальнейшее сотрудничество будет без плохих сюрпризов." \
+            "Надеюсь на ваше понимание.С уважением Акимов Сергей.Sun, 26 Oct 2014 10:03:21 -0700 (MST) от customerhelp@ebay.com:eBay отправил это сообщение Akimov, Sergey (m8se2000)." \
+            "Мы добавили ваше имя, указанное при регистрации, чтобы подтвердить, что сообщение действительно поступило от eBay.  Подробнее о том, как узнать, что это сообщение было действительно отправлено eBay. " \
+            "RE: RE родажа — выставление товаров на продажу SR# 1-35775134222 SR# 1-37461525747 Здравствуйте, Сергей!Спасибо за Ваше обращение в службу поддержки клиентов eBay. Меня зовут " \
+            "Агата, и я буду рада Вам помочь.Мы ценим каждого клиента и стремимся сделать платформу eBay самой удобной и безопасной для бизнеса. Пожалуйста, " \
+            "извините за долгий ответ. На данный момент в нашу службу поддержки поступает большое количество писем, которые обрабатываются в порядке" \
+            " очереди. льно изучив Вашу учетную запись, я вижу, что адрес Вашей регистрации Россия, поэтому позвольте мне продолжить разговор на русском.Я внимательн"
+
     freq = defaultdict(int)
+    print detect(example.decode('utf8', 'ignore'))
     if example != '' and detect(example.decode('utf8', 'ignore')) == 'en':
         for sent in en(example.decode('utf8', 'ignore')).sents:
             for token in en(clean_str(sent.text)):
