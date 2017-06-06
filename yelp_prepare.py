@@ -141,11 +141,8 @@ def make_data(split_points=(0.9, 0.95)):
             if detect(text.decode('utf-8','ignore'))=='en':
                 x = []
                 text = text.decode('utf-8','ignore')
-                print text
                 for sent in en(text).sents:
-                    print sent.text
                     x.append([vocab.get(tok.lemma_, UNKNOWN) for tok in sent])
-                print x
                 y = review[1]+'|'+review[2]
                 previous_y.add(y)
 
