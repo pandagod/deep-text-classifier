@@ -19,7 +19,7 @@ unknown_id = 2
 
 vocab_size = 200000
 
-def _read_dataset(fn, review_max_sentences=70, sentence_max_length=30, epochs=1):
+def _read_dataset(fn, review_max_sentences=30, sentence_max_length=40, epochs=1):
   f = open('./y_target.pickle', 'rb')
   lb = pickle.load(f)
   c = 0

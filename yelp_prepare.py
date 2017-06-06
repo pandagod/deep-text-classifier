@@ -1,7 +1,5 @@
-import argparse
-#parser = argparse.ArgumentParser()
-#parser.add_argument("review_path")
-#args = parser.parse_args()
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
 import spacy
@@ -36,7 +34,12 @@ def preparation(corpus):
     return [token.lemma_ for token in en(BeautifulSoup(corpus,"html.parser").get_text())]
 
 def clean_str(string):
+    string = re.sub(r"[^A-Za-z0-9();.,!#?’'`¥$€//\s]", "", string)
+    string = re.sub(r"\s{1,}", " ", string)
+    string = re.sub(r"\?{1,}", "?", string)
+    string = re.sub(r"\.{1,}", ".", string)
     string = string.strip().lower()
+
     return string
 
 def load_data_from_db():
@@ -71,22 +74,25 @@ def build_word_frequency_distribution():
 
   print('building frequency distribution')
   freq = defaultdict(int)
+
   for i, review in enumerate(load_data_from_db()):
+      if review[3] !='':
+        raw = clean_str(review[3] + ". " + review[4])
+      else:
+        raw = clean_str(review[4])
       try:
-          text = (review[3]+". "+review[4]).decode('utf8', 'ignore')
-          if text != '' and detect(text) == 'en':
-            for sent in en(text).sents:
-                for token in en(clean_str(sent.text)):
-                    freq[token.orth_] += 1
-            #doc = en.tokenizer((clean_str(text)).decode('utf8', 'ignore'))
-            #for token in doc:
-            #  freq[token.orth_] += 1
+          if detect(raw.decode('utf-8','ignore')) == 'en':
+            raw =raw.decode('utf-8','ignore')
+            for sent in en(raw).sents:
+                for token in sent:
+                    freq[token.lemma_] += 1
             if i % 10000 == 0:
               with open(path, 'wb') as freq_dist_f:
                 pickle.dump(freq, freq_dist_f)
               print('dump at {}'.format(i))
       except:
           print review[0]
+
   return freq
 
 def build_vocabulary(lower=3, n=200000):
@@ -99,13 +105,16 @@ def build_vocabulary(lower=3, n=200000):
     print('building vocabulary')
   freq = build_word_frequency_distribution()
 
+  print('vocabulary length')
   print (len(freq.items()))
   top_words = list(sorted(freq.items(), key=lambda x: -x[1]))[:n-lower-1]
+  print top_words
   vocab = {}
   i = lower
   for w, freq in top_words:
     vocab[w] = i
     i += 1
+
   with open(vocab_fn, 'wb') as vocab_file:
     pickle.dump(vocab, vocab_file)
   return vocab
@@ -124,29 +133,32 @@ def make_data(split_points=(0.9, 0.95)):
     source = list(load_data_from_db())
     random.shuffle(source)
     for review in tqdm(source):
-      text = (review[3]+'. '+review[4]).decode('utf8', 'ignore')
-      try:
-          if text!='' and detect(text)=='en':
-              x = []
-              for sent in en(text).sents:
-                  x.append([vocab.get(tok.orth_, UNKNOWN) for tok in en(clean_str(sent.text))])
-              #for sent in en(clean_str(review[3]+'. '+review[4]).decode('utf8', 'ignore')).sents:
-                #x.append([vocab.get(tok.orth_, UNKNOWN) for tok in sent])
+        if review[3] != '':
+            text = clean_str(review[3] + ". " + review[4])
+        else:
+            text = clean_str(review[4])
+        try:
+            if detect(text.decode('utf-8','ignore'))=='en':
+                x = []
+                text = text.decode('utf-8','ignore')
+                print text
+                for sent in en(text).sents:
+                    print sent.text
+                    x.append([vocab.get(tok.lemma_, UNKNOWN) for tok in sent])
+                print x
+                y = review[1]+'|'+review[2]
+                previous_y.add(y)
 
-              y = review[1]+'|'+review[2]
-              previous_y.add(y)
-
-              r = random.random()
-              if r < train_ratio:
-                f = train_f
-              elif r < dev_ratio:
-                f = dev_f
-              else:
-                f = test_f
-              pickle.dump((review[0],x, y), f)
-
-      except:
-          print review[0]
+                r = random.random()
+                if r < train_ratio:
+                  f = train_f
+                elif r < dev_ratio:
+                  f = dev_f
+                else:
+                  f = test_f
+                pickle.dump((review[0],x, y), f)
+        except:
+            print review[0]
   except KeyboardInterrupt:
     pass
 

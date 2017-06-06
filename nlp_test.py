@@ -30,31 +30,59 @@ def clean_str(string):
     #string = re.sub(r"\'d", " \'d", string)
     #string = re.sub(r"\'ll", " \'ll", string)
 
+
+    string = re.sub(r"\s{2,}", " ", string)
+
+    string = re.sub(r"\<", "", string)
+    string = re.sub(r"\>","",string)
     string = string.strip().lower()
 
     return string
 
 def test():
-    example=" Здравствуйте,Спасибо что наконец ответили,но у меня ещё остались вопросы и предложения к вам.Я прочитал всё что вы мне " \
-            "прислали,но там я не нашёл решения своей проблемы.Поэтому я хочу предложить вам следующие : Разрешите мне продать мой первый " \
-            "товар за сумму 7500$ и вы убедитесь что я честный и порядочный продавец,и что наше дальнейшее сотрудничество будет без плохих сюрпризов." \
-            "Надеюсь на ваше понимание.С уважением Акимов Сергей.Sun, 26 Oct 2014 10:03:21 -0700 (MST) от customerhelp@ebay.com:eBay отправил это сообщение Akimov, Sergey (m8se2000)." \
-            "Мы добавили ваше имя, указанное при регистрации, чтобы подтвердить, что сообщение действительно поступило от eBay.  Подробнее о том, как узнать, что это сообщение было действительно отправлено eBay. " \
-            "RE: RE родажа — выставление товаров на продажу SR# 1-35775134222 SR# 1-37461525747 Здравствуйте, Сергей!Спасибо за Ваше обращение в службу поддержки клиентов eBay. Меня зовут " \
-            "Агата, и я буду рада Вам помочь.Мы ценим каждого клиента и стремимся сделать платформу eBay самой удобной и безопасной для бизнеса. Пожалуйста, " \
-            "извините за долгий ответ. На данный момент в нашу службу поддержки поступает большое количество писем, которые обрабатываются в порядке" \
-            " очереди. льно изучив Вашу учетную запись, я вижу, что адрес Вашей регистрации Россия, поэтому позвольте мне продолжить разговор на русском.Я внимательн"
+    db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
+    cursor = db.cursor()
+    sql = "SELECT DISTINCT(sr_number),t1_final,t2_final ,subject,body FROM nice_text_source_data WHERE t2_final in ('Defect Appeal' \
+              'High Risk','Site Features - CCR','Selling Performance','VeRO - CCR','Bidding/Buying Items','Report a Member/Listing','Account Restriction' \
+              'Cancel Transaction','Logistics - CCR','Selling Limits - CCR','Listing Queries - CCR','Paying for Items','Seller Risk Management'," \
+          "'eBay Account Information - CCR','Shipping - CCR','Account Suspension','Buyer Protection Case Qs','Buyer Protect High ASP Claim'" \
+          ",'Buyer Protection Appeal INR','eBay Fees - CCR','Completing a Sale - CCR') and sr_number in('1-65330829105','1-103607488805','1-85311223454','1-55106417202'" \
+          ") ORDER BY RAND()"
+
+    try:
+        cursor.execute(sql)
+        results = cursor.fetchall()
+
+    except:
+        sys.stdout.write("Error: unable to fecth data" + '\n')
+
+    db.close()
 
     freq = defaultdict(int)
-    print detect(example.decode('utf8', 'ignore'))
-    if example != '' and detect(example.decode('utf8', 'ignore')) == 'en':
-        for sent in en(example.decode('utf8', 'ignore')).sents:
-            for token in en(clean_str(sent.text)):
-                freq[token.orth_] += 1
+    for i, review in enumerate(results):
+        raw = review[3]+'. '+review[4]
+        try:
+            if review != '' and detect(raw.decode('utf8')) == 'en':
+                print('raw language is %s' % detect(raw.decode('utf8')))
+                raw = clean_str(raw.decode('utf8'))
+                sents = en(clean_str(raw)).sents
+
+                print ("************document length is")
+                print len(list(sents))
+                for sent in en(raw).sents:
+                    for token in en(sent.text):
+                        if token.orth_=='item':
+                            print "*** get item"
+                        freq[token.orth_] += 1
+
+        except:
+
+            print review[0]
     n=50000
     lower = 3
 
-    top_words = list(sorted(freq.items(), key=lambda x: -x[1]))[:n - lower + 1]
+    top_words = list(sorted(freq.items(), key=lambda x: -x[1]))[:n - lower -1]
+    print top_words
 
     vocab = {}
     i = lower
@@ -63,10 +91,19 @@ def test():
         i += 1
     x = []
     UNKNOWN = 2
-    for sent in en(example.decode('utf8', 'ignore')).sents:
-        print sent
-        x.append([vocab.get(tok.orth_, UNKNOWN) for tok in en(clean_str(sent.text))])
-        print [vocab.get(tok.orth_, UNKNOWN) for tok in en(clean_str(sent.text))]
+
+    for i, review in enumerate(results):
+        raw = review[3]+'. '+review[4]
+        try:
+            if review != '' and detect(raw.decode('utf8')) == 'en':
+                raw = clean_str(raw.decode('utf8'))
+                print raw
+                for sent in en(raw).sents:
+                    x.append([vocab.get(tok.orth_, UNKNOWN) for tok in en((sent.text))])
+                    print sent.text
+                    print [vocab.get(tok.orth_, UNKNOWN) for tok in en((sent.text))]
+        except:
+            print review[0]
 
 
 if __name__ == '__main__':
