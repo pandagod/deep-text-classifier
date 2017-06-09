@@ -34,7 +34,7 @@ def preparation(corpus):
     return [token.lemma_ for token in en(BeautifulSoup(corpus,"html.parser").get_text())]
 
 def clean_str(string):
-    string = re.sub(r"[^A-Za-z0-9();.,!#?’'`¥$€//\s]", "", string)
+    string = re.sub(r"[^A-Za-z0-9();.,!#?’'`¥$€@//\s]", "", string)
     string = re.sub(r"\s{1,}", " ", string)
     string = re.sub(r"\?{1,}", "?", string)
     string = re.sub(r"\.{1,}", ".", string)
@@ -45,11 +45,11 @@ def clean_str(string):
 def load_data_from_db():
   db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
   cursor = db.cursor()
-  sql = "SELECT DISTINCT(sr_number),t1_final,t2_final ,subject,body FROM nice_text_source_data WHERE t2_final in ('Defect Appeal' \
-          'High Risk','Site Features - CCR','Selling Performance','VeRO - CCR','Bidding/Buying Items','Report a Member/Listing','Account Restriction' \
-          'Cancel Transaction','Logistics - CCR','Selling Limits - CCR','Listing Queries - CCR','Paying for Items','Seller Risk Management'," \
-          "'eBay Account Information - CCR','Shipping - CCR','Account Suspension','Buyer Protection Case Qs','Buyer Protect High ASP Claim'" \
-          ",'Buyer Protection Appeal INR','eBay Fees - CCR','Completing a Sale - CCR') ORDER BY RAND()"
+  sql = "SELECT DISTINCT(sr_number),t1_final,t2_final ,subject,body FROM nice_text_source_data WHERE t2_final in ('Defect Appeal', \
+          'High Risk','Site Features - CCR','Selling Performance','VeRO - CCR','Bidding/Buying Items','Report a Member/Listing','Account Restriction', \
+          'Cancel Transaction','Logistics - CCR','Selling Limits - CCR','Listing Queries - CCR','Paying for Items','Seller Risk Management',\
+          'eBay Account Information - CCR','Shipping - CCR','Account Suspension','Buyer Protection Case Qs','Buyer Protect High ASP Claim',\
+          'Buyer Protection Appeal INR','eBay Fees - CCR','Completing a Sale - CCR') ORDER BY RAND()"
 
   try:
     cursor.execute(sql)
