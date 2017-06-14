@@ -13,13 +13,21 @@ trainset_fn = os.path.join(data_dir, 'train.dataset')
 devset_fn = os.path.join(data_dir, 'dev.dataset')
 testset_fn = os.path.join(data_dir, 'test.dataset')
 vocab_fn = os.path.join(data_dir, 'vocab.pickle')
+vocab_length_fn = os.path.join(data_dir, 'vocab_length.pickle')
 
 reserved_tokens = 5
 unknown_id = 2
 
-vocab_size = 200000
 
-def _read_dataset(fn, review_max_sentences=30, sentence_max_length=40, epochs=1):
+
+def vocab_size():
+  vocab_len_fn = open(vocab_length_fn, 'rb')
+  vocab_size = pickle.load(vocab_len_fn)
+  vocab_size = vocab_size + 3
+  return vocab_size
+
+
+def _read_dataset(fn, review_max_sentences=40, sentence_max_length=50, epochs=1):
   f = open('./y_target.pickle', 'rb')
   lb = pickle.load(f)
   c = 0

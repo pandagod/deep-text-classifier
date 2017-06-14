@@ -52,7 +52,9 @@ labels = task.read_labels()
 #classes = max(labels.values())+1
 classes = len(labels.classes_)
 
-vocab_size = task.vocab_size
+vocab_size = task.vocab_size()
+print "vocab size length"
+print vocab_size
 
 #labels_rev = {v: k for k, v in labels.tolist()}
 vocab_rev = {int(v): k for k, v in vocab.items()}

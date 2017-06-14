@@ -16,22 +16,45 @@ import re
 from bs4 import BeautifulSoup
 from langdetect import detect
 
-en = spacy.load('en')
-en.pipeline = [en.tagger, en.parser]
+import en_core_web_sm
 
+en = en_core_web_sm.load()
+
+def replace_entity(span,replacement):
+    i = 1
+    for token in span:
+        if i == span.__len__():
+            token.lemma_ = replacement
+        else:
+            token.lemma_ = u''
+        i += 1
+
+def customize_rule(doc):
+    for ent in doc.ents:
+        if ent.label_ == u'PERSON':
+            replace_entity(ent,u'-PERSON-')
+        if ent.label_ == u'DATE':
+            replace_entity(ent,u'-DATE-')
+        if ent.label_ == u'TIME':
+            replace_entity(ent,u'-TIME-')
+        #if ent.label_ == u'ORG':
+        #    replace_entity(ent,u'-ORG-')
+
+    for token in doc:
+        if token.like_url:
+            token.lemma_ = u'-URL-'
+        if token.like_email:
+            token.lemma_ = u'-EMAIL-'
+        if token.is_digit and token.lemma_ not in [u'-DATE-',u'-TIME-',u'']:
+            token.lemma_ = u'-NUM-'
+        if token.lemma_ == u'-PRON-':
+            token.lemma_ = token.text
+
+en.pipeline = [en.tagger, en.entity, en.parser,customize_rule]
 #def read_reviews():
 #  with open(args.review_path, 'rb') as f:
 #    for line in f:
 #      yield json.loads(line)
-
-def punct_space(token):
-    return token.is_punct or token.is_stop or token.is_space
-
-def stop_word(token):
-    return token.is_stop
-
-def preparation(corpus):
-    return [token.lemma_ for token in en(BeautifulSoup(corpus,"html.parser").get_text())]
 
 def clean_str(string):
     string = re.sub(r"[^A-Za-z0-9();.,!#?’'`¥$€@//\s]", "", string)
@@ -49,7 +72,7 @@ def load_data_from_db():
           'High Risk','Site Features - CCR','Selling Performance','VeRO - CCR','Bidding/Buying Items','Report a Member/Listing','Account Restriction', \
           'Cancel Transaction','Logistics - CCR','Selling Limits - CCR','Listing Queries - CCR','Paying for Items','Seller Risk Management',\
           'eBay Account Information - CCR','Shipping - CCR','Account Suspension','Buyer Protection Case Qs','Buyer Protect High ASP Claim',\
-          'Buyer Protection Appeal INR','eBay Fees - CCR','Completing a Sale - CCR') ORDER BY RAND()"
+          'Buyer Protection Appeal INR','eBay Fees - CCR','Completing a Sale - CCR')"
 
   try:
     cursor.execute(sql)
@@ -95,7 +118,7 @@ def build_word_frequency_distribution():
 
   return freq
 
-def build_vocabulary(lower=3, n=200000):
+def build_vocabulary(lower=3):
   try:
     with open(vocab_fn, 'rb') as vocab_file:
       vocab = pickle.load(vocab_file)
@@ -107,8 +130,10 @@ def build_vocabulary(lower=3, n=200000):
 
   print('vocabulary length')
   print (len(freq.items()))
-  top_words = list(sorted(freq.items(), key=lambda x: -x[1]))[:n-lower-1]
+  top_words = list(sorted(filter(lambda x:x[1]>4,freq.items()), key=lambda x: -x[1]))
   print top_words
+  print('top words length')
+  print (len(top_words))
   vocab = {}
   i = lower
   for w, freq in top_words:
@@ -124,6 +149,12 @@ UNKNOWN = 2
 def make_data(split_points=(0.9, 0.95)):
   train_ratio, dev_ratio = split_points
   vocab = build_vocabulary()
+
+  vocab_len_fn = open(vocab_length_fn, 'wb')
+  pickle.dump(len(vocab), vocab_len_fn)
+  vocab_len_fn.close()
+
+
   train_f = open(trainset_fn, 'wb')
   dev_f = open(devset_fn, 'wb')
   test_f = open(testset_fn, 'wb')
