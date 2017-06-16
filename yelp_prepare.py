@@ -1,19 +1,15 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-import spacy
-import pickle
 import random
 from tqdm import tqdm
 from collections import defaultdict
-import numpy as np
 from yelp import *
 import MySQLdb
 from sklearn import preprocessing
 import sys
 import re
-from bs4 import BeautifulSoup
+
 from langdetect import detect
 
 import en_core_web_sm
@@ -32,21 +28,21 @@ def replace_entity(span,replacement):
 def customize_rule(doc):
     for ent in doc.ents:
         if ent.label_ == u'PERSON':
-            replace_entity(ent,u'-PERSON-')
+            replace_entity(ent,u'PERSON')
         if ent.label_ == u'DATE':
-            replace_entity(ent,u'-DATE-')
+            replace_entity(ent,u'DATE')
         if ent.label_ == u'TIME':
-            replace_entity(ent,u'-TIME-')
+            replace_entity(ent,u'TIME')
         #if ent.label_ == u'ORG':
         #    replace_entity(ent,u'-ORG-')
 
     for token in doc:
         if token.like_url:
-            token.lemma_ = u'-URL-'
+            token.lemma_ = u'URL'
         if token.like_email:
-            token.lemma_ = u'-EMAIL-'
+            token.lemma_ = u'EMAIL'
         if token.is_digit and token.lemma_ not in [u'-DATE-',u'-TIME-',u'']:
-            token.lemma_ = u'-NUM-'
+            token.lemma_ = u'NUM'
         if token.lemma_ == u'-PRON-':
             token.lemma_ = token.text
 
@@ -130,7 +126,7 @@ def build_vocabulary(lower=3):
 
   print('vocabulary length')
   print (len(freq.items()))
-  top_words = list(sorted(filter(lambda x:x[1]>4,freq.items()), key=lambda x: -x[1]))
+  top_words = list(sorted(filter(lambda x:x[1]>2,freq.items()), key=lambda x: -x[1]))
   print top_words
   print('top words length')
   print (len(top_words))

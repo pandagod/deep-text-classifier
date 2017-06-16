@@ -176,7 +176,7 @@ def train():
 
     def train_step(x, y):
 
-      fd = model.get_feed_data(x, y, class_weights=class_weights,dropout_keep_proba=0.5)
+      fd = model.get_feed_data(x, y, class_weights=class_weights,dropout_keep_proba=1)
       t0 = time.clock()
       step, summaries, loss, accuracy, _ = s.run([
         model.global_step,
