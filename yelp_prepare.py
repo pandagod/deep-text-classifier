@@ -126,7 +126,7 @@ def build_vocabulary(lower=3):
 
   print('vocabulary length')
   print (len(freq.items()))
-  top_words = list(sorted(filter(lambda x:x[1]>2,freq.items()), key=lambda x: -x[1]))
+  top_words = list(sorted(filter(lambda x:x[1]>1,freq.items()), key=lambda x: -x[1]))
   print top_words
   print('top words length')
   print (len(top_words))
