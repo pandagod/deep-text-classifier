@@ -64,11 +64,10 @@ def clean_str(string):
 def load_data_from_db():
   db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
   cursor = db.cursor()
-  sql = "SELECT DISTINCT(sr_number),t1_final,t2_final ,subject,body FROM nice_text_source_data WHERE t2_final in ('Defect Appeal', \
-          'High Risk','Site Features - CCR','Selling Performance','VeRO - CCR','Bidding/Buying Items','Report a Member/Listing','Account Restriction', \
-          'Cancel Transaction','Logistics - CCR','Selling Limits - CCR','Listing Queries - CCR','Paying for Items','Seller Risk Management',\
-          'eBay Account Information - CCR','Shipping - CCR','Account Suspension','Buyer Protection Case Qs','Buyer Protect High ASP Claim',\
-          'Buyer Protection Appeal INR','eBay Fees - CCR','Completing a Sale - CCR')"
+  sql = "SELECT DISTINCT(sr_number),t1_final,t2_final ,subject,body FROM nice_text_source_data WHERE t2_final in ('eBay Account Information - CCR', \
+            'Buyer Protect High ASP Claim','VeRO - CCR','Logistics - CCR','Buyer Protection Escalate SNAD','High Risk','Buyer Protection Appeal SNAD','Seller Risk Management', \
+            'Buyer Protection Appeal INR','Returns','Buyer Protection Programs Qs','Buyer Protection Escalate INR','Selling Limits - CCR','Buyer Protection Case Qs', \
+            'Contact Trading Partner - CCR','Paying for Items','Defect Appeal','Specialty Selling Approvals')"
 
   try:
     cursor.execute(sql)

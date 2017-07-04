@@ -22,7 +22,7 @@ def bidirectional_rnn(cell_fw, cell_bw, inputs_embedded, input_lengths,
                                             dtype=tf.float32,
                                             swap_memory=True,
                                             scope=scope))
-        outputs = tf.concat((fw_outputs, fw_outputs), 2)
+        outputs = tf.concat((fw_outputs, bw_outputs), 2)
 
         def concatenate_state(fw_state, bw_state):
             if isinstance(fw_state, LSTMStateTuple):
@@ -59,19 +59,16 @@ def task_specific_attention(inputs, output_size,
     """
     Performs task-specific attention reduction, using learned
     attention context vector (constant within task of interest).
-
     Args:
         inputs: Tensor of shape [batch_size, units, input_size]
             `input_size` must be static (known)
             `units` axis will be attended over (reduced from output)
             `batch_size` will be preserved
         output_size: Size of output's inner (feature) dimension
-
     Returns:
         outputs: Tensor of shape [batch_size, output_dim].
     """
-    assert len(inputs.get_shape()) == 3 and inputs.get_shape(
-    )[-1].value is not None
+    assert len(inputs.get_shape()) == 3 and inputs.get_shape()[-1].value is not None
 
     with tf.variable_scope(scope or 'attention') as scope:
         attention_context_vector = tf.get_variable(name='attention_context_vector',
@@ -81,10 +78,9 @@ def task_specific_attention(inputs, output_size,
         input_projection = layers.fully_connected(inputs, output_size,
                                                   activation_fn=activation_fn,
                                                   scope=scope)
-        attention_weights = tf.nn.softmax(
-            tf.multiply(input_projection, attention_context_vector)
-        )
 
+        vector_attn = tf.reduce_sum(tf.multiply(input_projection, attention_context_vector), axis=2, keep_dims=True)
+        attention_weights = tf.nn.softmax(vector_attn, dim=1)
         weighted_projection = tf.multiply(input_projection, attention_weights)
 
         outputs = tf.reduce_sum(weighted_projection, axis=1)
