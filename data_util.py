@@ -8,9 +8,9 @@ def batch(inputs):
   document_size = document_sizes.max()
 
   sentence_sizes_ = [[len(sent) for sent in doc] for doc in inputs]
-  sentence_size = max(map(max, sentence_sizes_))
+  max_sentence_size = max(map(max, sentence_sizes_))
 
-  b = np.zeros(shape=[batch_size, document_size, sentence_size], dtype=np.int32) # == PAD
+  b = np.zeros(shape=[batch_size, document_size, max_sentence_size], dtype=np.int32) # == PAD
 
   sentence_sizes = np.zeros(shape=[batch_size, document_size], dtype=np.int32)
   for i, document in enumerate(inputs):
