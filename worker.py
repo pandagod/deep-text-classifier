@@ -4,8 +4,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--task', default='yelp', choices=['yelp'])
 parser.add_argument('--mode', default='train', choices=['train', 'eval'])
 parser.add_argument('--checkpoint-frequency', type=int, default=100)
-parser.add_argument('--eval-frequency', type=int, default=1000)
-parser.add_argument('--batch-size', type=int, default=64)
+parser.add_argument('--eval-frequency', type=int, default=10)
+parser.add_argument('--batch-size', type=int, default=32)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
 parser.add_argument("--lr", type=float, default=0.001)
@@ -77,7 +77,7 @@ def HAN_model_1(session, restore_only=False):
 
   cell = BNLSTMCell(80, is_training) # h-h batchnorm LSTMCell
   # cell = GRUCell(30)
-  cell = MultiRNNCell([cell]*5)
+  cell = MultiRNNCell([cell]*2)
 
   model = HANClassifierModel(
       vocab_size=vocab_size,
@@ -115,6 +115,7 @@ def decode(ex):
 print('data loaded')
 
 def batch_iterator(dataset, batch_size, max_epochs):
+  random.shuffle(dataset)
   for i in range(max_epochs):
     xb = []
     yb = []
@@ -211,7 +212,8 @@ def train():
         saver.save(s, checkpoint_path, global_step=current_step)
         print('checkpoint done')
       if current_step != 0 and current_step % args.eval_frequency == 0:
-        for x, y in tqdm(batch_iterator(task.read_devset(epochs=1), args.batch_size, 1)):
+        devset = task.read_devset(epochs=1)
+        for x, y in tqdm(batch_iterator(devset, len(devset), 1)):
           dev_step(x,y)
 
 def main():
