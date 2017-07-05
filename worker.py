@@ -115,12 +115,10 @@ def decode(ex):
 print('data loaded')
 
 def batch_iterator(dataset, batch_size, max_epochs):
-  dataset= list(dataset)
-  random.shuffle(dataset)
   for i in range(max_epochs):
     xb = []
     yb = []
-    for ex in dataset:
+    for ex in sorted(dataset, key=lambda k: random.random()):
       x, y = ex
       xb.append(x)
       yb.append(y)
