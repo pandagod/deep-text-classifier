@@ -118,7 +118,7 @@ def batch_iterator(dataset, batch_size, max_epochs):
   for i in range(max_epochs):
     xb = []
     yb = []
-    for ex in sorted(dataset, key=lambda k: random.random()):
+    for ex in dataset:
       x, y = ex
       xb.append(x)
       yb.append(y)
