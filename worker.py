@@ -204,7 +204,6 @@ def train():
       dev_summary_writer.add_summary(summaries, global_step=step)
 
     devset = task.read_devset(epochs=1)
-    dev_batch_size = len(list(devset))
     for i, (x, y) in enumerate(batch_iterator(task.read_trainset(epochs=90), args.batch_size, 300)):
       train_step(x,y)
       current_step =tf.train.global_step(s,global_step)
@@ -213,7 +212,7 @@ def train():
         saver.save(s, checkpoint_path, global_step=current_step)
         print('checkpoint done')
       if current_step != 0 and current_step % args.eval_frequency == 0:
-        for x, y in tqdm(batch_iterator(devset, dev_batch_size, 1)):
+        for x, y in dev_iterator(devset):
           dev_step(x,y)
 
 def main():
