@@ -212,7 +212,7 @@ def train():
         saver.save(s, checkpoint_path, global_step=current_step)
         print('checkpoint done')
       if current_step != 0 and current_step % args.eval_frequency == 0:
-        for x, y in dev_iterator(devset):
+        for x, y in dev_iterator(devset).iteritems():
           dev_step(x,y)
 
 def main():
