@@ -8,7 +8,7 @@ parser.add_argument('--eval-frequency', type=int, default=10)
 parser.add_argument('--batch-size', type=int, default=32)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
-parser.add_argument("--lr", type=float, default=0.01)
+parser.add_argument("--lr", type=float, default=0.0001)
 args = parser.parse_args()
 
 import importlib
