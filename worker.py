@@ -77,7 +77,7 @@ def HAN_model_1(session, restore_only=False):
 
   cell = BNLSTMCell(80, is_training) # h-h batchnorm LSTMCell
   # cell = GRUCell(30)
-  cell = MultiRNNCell([cell]*5)
+  cell = MultiRNNCell([cell]*2)
 
   model = HANClassifierModel(
       vocab_size=vocab_size,
