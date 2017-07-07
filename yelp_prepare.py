@@ -141,7 +141,7 @@ def build_vocabulary(lower=3):
 
 UNKNOWN = 2
 
-def make_data(split_points=(0.95, 0.98)):
+def make_data(split_points=(0.95, 0.9999)):
   train_ratio, dev_ratio = split_points
   vocab = build_vocabulary()
 
