@@ -187,7 +187,7 @@ def train():
       ], fd)
 
       td = time.clock() - t0
-      print('step %s, loss=%s, accuracy=%s, t=%s, inputs=%s' % (step, loss, accuracy, round(td, 2), fd[model.inputs].shape))
+      print('step %s, loss=%s, accuracy=%s, t=%s, inputs=%s' % (step, loss, accuracy, round(td, 5), fd[model.inputs].shape))
       train_summary_writer.add_summary(summaries, global_step=step)
 
     def dev_step(x,y):
@@ -200,7 +200,7 @@ def train():
       ], fd)
 
       print('evaluation at step %s' % step)
-      print('dev accuracy: %.2f' % accuracy)
+      print('dev accuracy: %.5f' % accuracy)
       dev_summary_writer.add_summary(summaries, global_step=step)
 
     devset = task.read_devset(epochs=1)
