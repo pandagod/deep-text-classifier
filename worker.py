@@ -4,11 +4,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--task', default='yelp', choices=['yelp'])
 parser.add_argument('--mode', default='train', choices=['train', 'eval'])
 parser.add_argument('--checkpoint-frequency', type=int, default=100)
-parser.add_argument('--eval-frequency', type=int, default=10)
+parser.add_argument('--eval-frequency', type=int, default=50)
 parser.add_argument('--batch-size', type=int, default=32)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
-parser.add_argument("--lr", type=float, default=0.0001)
+parser.add_argument("--lr", type=float, default=0.001)
 args = parser.parse_args()
 
 import importlib
@@ -176,7 +176,7 @@ def train():
 
     def train_step(x, y):
 
-      fd = model.get_feed_data(x, y, class_weights=class_weights,dropout_keep_proba=1)
+      fd = model.get_feed_data(x, y, class_weights=class_weights,dropout_keep_proba=0.5)
       t0 = time.clock()
       step, summaries, loss, accuracy, _ = s.run([
         model.global_step,
