@@ -83,7 +83,7 @@ def load_data():
 def load_data_from_db():
     db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
     cursor = db.cursor()
-    sql = "SELECT sr_number,l1_topic,l2_topic ,body FROM 2017_nice_text_source_data limit 1000"
+    sql = "SELECT sr_number,l1_topic,l2_topic ,body FROM 2017_nice_text_source_data"
 
     try:
         cursor.execute(sql)
