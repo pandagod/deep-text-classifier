@@ -26,6 +26,7 @@ import tensorflow as tf
 from tensorflow.contrib.tensorboard.plugins import projector
 import yaml
 from tqdm import tqdm
+import sys
 
 import ujson
 from data_util import batch
@@ -97,7 +98,7 @@ def HAN_model_1(session, restore_only=False):
   saver = tf.train.Saver(tf.global_variables())
   checkpoint = tf.train.get_checkpoint_state(checkpoint_dir)
   if checkpoint:
-    print("Reading model parameters from %s" % checkpoint.model_checkpoint_path)
+    sys.stdout.write("Reading model parameters from %s \n" % checkpoint.model_checkpoint_path)
     saver.restore(session, checkpoint.model_checkpoint_path)
   elif restore_only:
     print("Cannot restore model")
@@ -113,7 +114,7 @@ def decode(ex):
   print('text: ' + '\n'.join([' '.join([vocab_rev.get(wid, '<?>') for wid in sent]) for sent in ex[0]]))
   print('label: ', labels.transform([ex[1]]))
 
-print('data loaded')
+sys.stdout.write('data loaded \n')
 
 def batch_iterator(dataset, batch_size, max_epochs):
   for i in range(max_epochs):
@@ -154,9 +155,9 @@ def evaluate(dataset):
   with tf.Session(config=config) as s:
     model, _ = model_fn(s, restore_only=True)
     df = ev(s, model, dataset)
-  print((df['predictions'] == df['labels']).mean())
-  print df['predictions']
-  print df['labels']
+    sys.stdout.write((df['predictions'] == df['labels']).mean()+'\n')
+    sys.stdout.write(df['predictions']+'\n')
+    sys.stdout.write(df['labels']+'\n')
   #import IPython
   #IPython.embed()
 
@@ -188,7 +189,7 @@ def train():
       ], fd)
 
       td = time.clock() - t0
-      print('step %s, loss=%s, accuracy=%s, t=%s, inputs=%s' % (step, loss, accuracy, round(td, 5), fd[model.inputs].shape))
+      sys.stdout.write('step %s, loss=%s, accuracy=%s, t=%s, inputs=%s \n' % (step, loss, accuracy, round(td, 5), fd[model.inputs].shape))
       train_summary_writer.add_summary(summaries, global_step=step)
 
     def dev_step(x,y):
@@ -200,8 +201,8 @@ def train():
         model.accuracy
       ], fd)
 
-      print('evaluation at step %s' % step)
-      print('dev accuracy: %.5f' % accuracy)
+      sys.stdout.write('evaluation at step %s \n' % step)
+      sys.stdout.write('dev accuracy: %.5f \n' % accuracy)
       dev_summary_writer.add_summary(summaries, global_step=step)
 
     devset = task.read_devset(epochs=1)
@@ -210,9 +211,9 @@ def train():
       train_step(x,y)
       current_step =tf.train.global_step(s,global_step)
       if current_step != 0 and current_step % args.checkpoint_frequency == 0:
-        print('checkpoint & graph meta')
+        sys.stdout.write('checkpoint & graph meta \n')
         saver.save(s, checkpoint_path, global_step=current_step)
-        print('checkpoint done')
+        sys.stdout.write('checkpoint done \n')
       if current_step != 0 and current_step % args.eval_frequency == 0:
         dev_step(dev_x,dev_y)
 
