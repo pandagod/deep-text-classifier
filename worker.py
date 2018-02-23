@@ -24,6 +24,7 @@ import pandas as pd
 import spacy
 import tensorflow as tf
 from tensorflow.contrib.tensorboard.plugins import projector
+import yaml
 from tqdm import tqdm
 
 import ujson

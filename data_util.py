@@ -20,3 +20,18 @@ def batch(inputs):
         b[i, j, k] = word
 
   return b, document_sizes, sentence_sizes
+
+def load_embedding_vectors_glove(vocabulary, filename, vector_size):
+    # load embedding_vectors from the glove
+    # initial matrix with random uniform
+    embedding_vectors = np.random.uniform(-0.25, 0.25, (len(vocabulary), vector_size))
+    f = open(filename)
+    for line in f:
+        values = line.split()
+        word = values[0]
+        vector = np.asarray(values[1:], dtype="float32")
+        idx = vocabulary.get(word)
+        if idx != 0:
+            embedding_vectors[idx] = vector
+    f.close()
+    return embedding_vectors
