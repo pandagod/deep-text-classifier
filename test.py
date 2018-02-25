@@ -154,7 +154,7 @@ UNKNOWN = 2
 
 def topicMapToGroup(topic):
     if topic in ['Bidding/Buying Items','Account Safety - CCR','Unknown','Buyer Loyalty Programs','eBay Account Information - CCR','Listing Ended/Removed - Buyer','eBay Partner Sites - CCR',
-        'Paying for Items','Forgot User ID or  Password',
+        'Paying for Items','Forgot User ID or Password',
         'Search - Buying','Payment Service Account Setup',
         'Seller Suspended - Buyer',	'Registering an Account',
 	    'Site Features - CCR']:
