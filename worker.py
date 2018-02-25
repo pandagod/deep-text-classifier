@@ -141,7 +141,7 @@ def ev(session, model, dataset):
   predictions = []
   labels = []
   examples = []
-  for x, y in tqdm(batch_iterator(dataset, 512, 1)):
+  for x, y in tqdm(batch_iterator(dataset, 64, 1)):
     examples.extend(x)
     labels.extend(y)
     predictions.extend(session.run(model.prediction, model.get_feed_data(x, dropout_keep_proba=1)))
@@ -155,7 +155,6 @@ def evaluate(dataset):
   with tf.Session(config=config) as s:
     model, _ = model_fn(s, restore_only=True)
     df = ev(s, model, dataset)
-    print((df['predictions'] == df['labels']).mean())
     print((df['predictions'] == df['labels']).mean())
     print(df['predictions'])
     print(df['labels'])
