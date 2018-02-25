@@ -77,7 +77,7 @@ def clean_str(string):
 def load_data_from_db():
     db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
     cursor = db.cursor()
-    sql = "SELECT sr_number,l1_topic,l2_topic ,email_body FROM 0101test"
+    sql = "SELECT sr_num,l1_topic,l2_topic ,email_body FROM 0101test"
 
     try:
         cursor.execute(sql)
