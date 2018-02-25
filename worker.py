@@ -155,9 +155,10 @@ def evaluate(dataset):
   with tf.Session(config=config) as s:
     model, _ = model_fn(s, restore_only=True)
     df = ev(s, model, dataset)
-    sys.stdout.write((df['predictions'] == df['labels']).mean()+'\n')
-    sys.stdout.write(df['predictions']+'\n')
-    sys.stdout.write(df['labels']+'\n')
+    print((df['predictions'] == df['labels']).mean())
+    print((df['predictions'] == df['labels']).mean())
+    print(df['predictions'])
+    print(df['labels'])
   #import IPython
   #IPython.embed()
 
