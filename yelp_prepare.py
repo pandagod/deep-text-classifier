@@ -83,7 +83,7 @@ def load_data():
 def load_data_from_db():
     db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
     cursor = db.cursor()
-    sql = "SELECT sr_number,l1_topic,l2_topic ,body FROM 2017_nice_text_source_data"
+    sql = "SELECT sr_number,l1_topic,l2_topic ,body FROM 2017_topic_train"
 
     try:
         cursor.execute(sql)
@@ -150,7 +150,7 @@ def build_vocabulary(lower=3):
 
     print('vocabulary length')
     print (len(freq.items()))
-    top_words = list(sorted(filter(lambda x: x[1] > 4, freq.items()), key=lambda x: -x[1]))
+    top_words = list(sorted(filter(lambda x: x[1] > 6, freq.items()), key=lambda x: -x[1]))
     print top_words
     print('top words length')
     print (len(top_words))
@@ -170,7 +170,7 @@ UNKNOWN = 2
 
 def topicMapToGroup(topic):
     if topic in ['Bidding/Buying Items','Account Safety - CCR','Unknown','Buyer Loyalty Programs','eBay Account Information - CCR','Listing Ended/Removed - Buyer','eBay Partner Sites - CCR',
-        'Paying for Items','Forgot User ID or  Password',
+        'Paying for Items','Forgot User ID or Password',
         'Search - Buying','Payment Service Account Setup',
         'Seller Suspended - Buyer',	'Registering an Account',
 	    'Site Features - CCR']:
@@ -239,7 +239,7 @@ def topicMapToGroup(topic):
     else:
         return topic
 
-def make_data(split_points=(0.96, 0.98)):
+def make_data(split_points=(0.98, 0.99)):
     train_ratio, dev_ratio = split_points
     vocab = build_vocabulary()
 
@@ -263,7 +263,7 @@ def make_data(split_points=(0.96, 0.98)):
                     text = text.decode('utf-8', 'ignore')
                     for sent in en(text).sents:
                         x.append([vocab.get(tok.lemma_, UNKNOWN) for tok in sent])
-                    y = topicMapToGroup(review[2])
+                    y = review[2]
                     previous_y.add(y)
 
                     r = random.random()

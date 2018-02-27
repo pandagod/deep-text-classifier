@@ -156,8 +156,6 @@ def evaluate(dataset):
     model, _ = model_fn(s, restore_only=True)
     df = ev(s, model, dataset)
     print((df['predictions'] == df['labels']).mean())
-    print(df['predictions'])
-    print(df['labels'])
   #import IPython
   #IPython.embed()
 
