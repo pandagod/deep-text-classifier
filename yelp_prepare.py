@@ -80,17 +80,17 @@ def load_data_from_db(name):
     db = MySQLdb.connect("10.249.71.213", "root", "root", "ai")
     cursor = db.cursor()
     if name == 'train':
-        sql = "SELECT A.sr_number,B.first_l2_correct_topic as t1_final, B.first_l1_correct_topic as t2_final," \
+        sql = "SELECT A.sr_number,B.first_l1_correct_topic as t1_final, B.first_l2_correct_topic as t2_final," \
               "A.inbound_subject_0 as subject,A.inbound_body_0 as body " \
               "FROM ai.elaborate_full_inbound_outbound A , ai.elaborate_full_topic B " \
               "where A.sr_number = B.sr_number limit 100"
     elif name == 'dev1':
-        sql = "SELECT A.sr_number,B.first_l2_correct_topic as t1_final, B.first_l1_correct_topic as t2_final," \
+        sql = "SELECT A.sr_number,B.first_correct_l1_topic as t1_final, B.first_correct_l2_topic as t2_final," \
               "A.inbound_subject_0 as subject,A.inbound_body_0 as body " \
               "FROM ai.elaborate_full_inbound_outbound A , ai.2018_04_02 B " \
               "where A.sr_number = B.sr_number limit 100"
     elif name == 'dev2':
-        sql = "SELECT A.sr_number,B.first_l2_correct_topic as t1_final, B.first_l1_correct_topic as t2_final," \
+        sql = "SELECT A.sr_number,B.first_correct_l1_topic as t1_final, B.first_correct_l2_topic as t2_final," \
               "A.inbound_subject_0 as subject,A.inbound_body_0 as body " \
               "FROM ai.elaborate_full_inbound_outbound A , ai.2018_unknown B " \
               "where A.sr_number = B.sr_number limit 100"
