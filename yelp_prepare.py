@@ -129,9 +129,10 @@ def build_word_frequency_distribution():
     print('building frequency distribution')
     freq = defaultdict(int)
     for i, review in enumerate(load_data('train')):
-
-        raw = clean_str(review[3]+". "+review[4])
-
+        if review[3]!='':
+            raw = clean_str(review[3]+". "+review[4])
+        else:
+            raw = clean_str(review[4])
         try:
             if detect(raw.decode('utf-8', 'ignore')) == 'en':
                 raw = raw.decode('utf-8', 'ignore')
@@ -269,7 +270,10 @@ def make_data():
         dev2_source = list(load_data('dev2'))
         random.shuffle(train_source)
         for review in tqdm(train_source):
-            text = clean_str(review[3]+". "+review[4])
+            if review[3]!='':
+                text = clean_str(review[3]+". "+review[4])
+            else:
+                text = clean_str(review[4])
             try:
                 if detect(text.decode('utf-8', 'ignore')) == 'en':
                     x = []
@@ -284,7 +288,10 @@ def make_data():
             except:
                 print review[0]
         for review in tqdm(dev1_source):
-            text = clean_str(review[3]+". "+review[4])
+            if review[3]!='':
+                text = clean_str(review[3]+". "+review[4])
+            else:
+                text = clean_str(review[4])
             try:
                 if detect(text.decode('utf-8', 'ignore')) == 'en':
                     x = []
@@ -298,7 +305,10 @@ def make_data():
             except:
                 print review[0]
         for review in tqdm(dev2_source):
-            text = clean_str(review[3]+". "+review[4])
+            if review[3]!='':
+                text = clean_str(review[3]+". "+review[4])
+            else:
+                text = clean_str(review[4])
             try:
                 if detect(text.decode('utf-8', 'ignore')) == 'en':
                     x = []
