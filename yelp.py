@@ -2,7 +2,7 @@ import os
 import pickle
 import numpy as np
 
-train_dir = os.path.join(os.path.curdir, './yelp')
+train_dir = os.path.join(os.path.curdir, './emailtask')
 data_dir = os.path.join(train_dir, 'data')
 
 for dir in [train_dir, data_dir]:
@@ -10,10 +10,13 @@ for dir in [train_dir, data_dir]:
     os.makedirs(dir)
 
 trainset_fn = os.path.join(data_dir, 'train.dataset')
-devset_fn = os.path.join(data_dir, 'dev.dataset')
-testset_fn = os.path.join(data_dir, 'test.dataset')
+#devset_fn = os.path.join(data_dir, 'dev.dataset')
+#testset_fn = os.path.join(data_dir, 'test.dataset')
+devset1_fn = os.path.join(data_dir, 'dev1.dataset')
+devset2_fn = os.path.join(data_dir, 'dev2.dataset')
 vocab_fn = os.path.join(data_dir, 'vocab.pickle')
 vocab_length_fn = os.path.join(data_dir, 'vocab_length.pickle')
+target_fn = os.path.join(data_dir, 'y_target.pickle')
 
 reserved_tokens = 5
 unknown_id = 2
@@ -27,7 +30,7 @@ def vocab_size():
   return vocab_size
 
 
-def _read_dataset(fn, review_max_sentences=40, sentence_max_length=50, epochs=1):
+def _read_dataset(fn, review_max_sentences=30, sentence_max_length=30, epochs=1):
   f = open('./y_target.pickle', 'rb')
   lb = pickle.load(f)
   c = 0
@@ -54,17 +57,16 @@ def read_trainset(epochs=1):
   return _read_dataset(trainset_fn, epochs=epochs)
 
 def read_devset(epochs=1):
-  return _read_dataset(devset_fn, epochs=epochs)
+  return _read_dataset(devset1_fn, epochs=epochs)
 
 def read_testset(epochs=1):
-  return _read_dataset(testset_fn, epochs=epochs)
+  return _read_dataset(devset2_fn, epochs=epochs)
 
 def read_vocab():
   with open(vocab_fn, 'rb') as f:
     return pickle.load(f)
 
 def read_labels():
-  f = open('./y_target.pickle', 'rb')
+  f = open(target_fn, 'rb')
   lb = pickle.load(f)
   return lb
-  #return {i: class_ for class_ in lb.classes_}
