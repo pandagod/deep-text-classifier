@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--task', default='emailtask', choices=['yelp'])
+parser.add_argument('--task', default='yelp', choices=['yelp'])
 parser.add_argument('--mode', default='train', choices=['train', 'eval'])
 parser.add_argument('--checkpoint-frequency', type=int, default=2)
 parser.add_argument('--eval-frequency', type=int, default=2)
