@@ -221,8 +221,8 @@ def train():
         saver.save(s, checkpoint_path, global_step=current_step)
         sys.stdout.write('checkpoint done \n')
       if current_step != 0 and current_step % args.eval_frequency == 0:
-        dev_step(dev1_x[0:1500], dev1_y[0:1024], "dev1")
-        dev_step(dev2_x[0:1500], dev2_y[0:1024], "dev2")
+        dev_step(dev1_x[0:1024], dev1_y[0:1024], "dev1")
+        dev_step(dev2_x[0:1024], dev2_y[0:1024], "dev2")
 
 def main():
   if args.mode == 'train':
