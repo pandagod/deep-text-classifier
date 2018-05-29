@@ -109,6 +109,7 @@ class HANClassifierModel():
         self.word_size,
         self.embedding_size
       ])
+
       word_level_lengths = tf.reshape(
         self.word_lengths, [self.document_size * self.sentence_size])
 

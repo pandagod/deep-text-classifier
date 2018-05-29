@@ -5,7 +5,7 @@ parser.add_argument('--task', default='yelp', choices=['yelp'])
 parser.add_argument('--mode', default='train', choices=['train', 'eval'])
 parser.add_argument('--checkpoint-frequency', type=int, default=100)
 parser.add_argument('--eval-frequency', type=int, default=200)
-parser.add_argument('--batch-size', type=int, default=128)
+parser.add_argument('--batch-size', type=int, default=64)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
 parser.add_argument("--lr", type=float, default=0.0001)
@@ -169,8 +169,11 @@ def train():
     train_summary_dir = os.path.join(tflog_dir,"train")
     train_summary_writer = tf.summary.FileWriter(train_summary_dir, graph=tf.get_default_graph())
 
-    dev_summary_dir = os.path.join(tflog_dir,"dev")
-    dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, graph=tf.get_default_graph())
+    dev1_summary_dir = os.path.join(tflog_dir, "dev1")
+    dev1_summary_writer = tf.summary.FileWriter(dev1_summary_dir, graph=tf.get_default_graph())
+
+    dev2_summary_dir = os.path.join(tflog_dir, "dev2")
+    dev2_summary_writer = tf.summary.FileWriter(dev2_summary_dir, graph=tf.get_default_graph())
 
     global_step = model.global_step
 
@@ -190,7 +193,7 @@ def train():
       sys.stdout.write('step %s, loss=%s, accuracy=%s, t=%s, inputs=%s \n' % (step, loss, accuracy, round(td, 5), fd[model.inputs].shape))
       train_summary_writer.add_summary(summaries, global_step=step)
 
-    def dev_step(x,y):
+    def dev_step(x,y,name):
       fd = model.get_feed_data(x, y, class_weights=class_weights,dropout_keep_proba=1)
       step, summaries, loss, accuracy = s.run([
         model.global_step,
@@ -201,10 +204,15 @@ def train():
 
       sys.stdout.write('evaluation at step %s \n' % step)
       sys.stdout.write('dev accuracy: %.5f \n' % accuracy)
-      dev_summary_writer.add_summary(summaries, global_step=step)
+      if name =='dev1':
+        dev1_summary_writer.add_summary(summaries, global_step=step)
+      elif name=='dev2':
+        dev2_summary_writer.add_summary(summaries, global_step=step)
 
-    devset = task.read_devset(epochs=1)
-    dev_x,dev_y = dev_iterator(devset)
+    devset1 = task.read_devset1(epochs=1)
+    devset2 = task.read_devset2(epochs=1)
+    dev1_x, dev1_y = dev_iterator(devset1)
+    dev2_x, dev2_y = dev_iterator(devset2)
     for i, (x, y) in enumerate(batch_iterator(task.read_trainset(epochs=90), args.batch_size, 300)):
       train_step(x,y)
       current_step =tf.train.global_step(s,global_step)
@@ -213,7 +221,8 @@ def train():
         saver.save(s, checkpoint_path, global_step=current_step)
         sys.stdout.write('checkpoint done \n')
       if current_step != 0 and current_step % args.eval_frequency == 0:
-        dev_step(dev_x,dev_y)
+        dev_step(dev1_x, dev1_y, "dev1")
+        dev_step(dev2_x, dev2_y, "dev2")
 
 def main():
   if args.mode == 'train':

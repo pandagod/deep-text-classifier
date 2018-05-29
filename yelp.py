@@ -31,7 +31,7 @@ def vocab_size():
 
 
 def _read_dataset(fn, review_max_sentences=30, sentence_max_length=30, epochs=1):
-  f = open('./y_target.pickle', 'rb')
+  f = open(target_fn, 'rb')
   lb = pickle.load(f)
   c = 0
   while 1:
@@ -56,10 +56,10 @@ def _read_dataset(fn, review_max_sentences=30, sentence_max_length=30, epochs=1)
 def read_trainset(epochs=1):
   return _read_dataset(trainset_fn, epochs=epochs)
 
-def read_devset(epochs=1):
+def read_devset1(epochs=1):
   return _read_dataset(devset1_fn, epochs=epochs)
 
-def read_testset(epochs=1):
+def read_devset2(epochs=1):
   return _read_dataset(devset2_fn, epochs=epochs)
 
 def read_vocab():
