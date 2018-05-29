@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--task', default='yelp', choices=['yelp'])
+parser.add_argument('--task', default='emailtask', choices=['emailtask'])
 parser.add_argument('--mode', default='train', choices=['train', 'eval'])
-parser.add_argument('--checkpoint-frequency', type=int, default=100)
-parser.add_argument('--eval-frequency', type=int, default=200)
+parser.add_argument('--checkpoint-frequency', type=int, default=2)
+parser.add_argument('--eval-frequency', type=int, default=2)
 parser.add_argument('--batch-size', type=int, default=64)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
