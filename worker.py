@@ -3,8 +3,8 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--task', default='yelp', choices=['yelp'])
 parser.add_argument('--mode', default='train', choices=['train', 'eval'])
-parser.add_argument('--checkpoint-frequency', type=int, default=500)
-parser.add_argument('--eval-frequency', type=int, default=500)
+parser.add_argument('--checkpoint-frequency', type=int, default=2)
+parser.add_argument('--eval-frequency', type=int, default=2)
 parser.add_argument('--batch-size', type=int, default=64)
 parser.add_argument("--device", default="/cpu:0")
 parser.add_argument("--max-grad-norm", type=float, default=5.0)
@@ -221,8 +221,8 @@ def train():
         saver.save(s, checkpoint_path, global_step=current_step)
         sys.stdout.write('checkpoint done \n')
       if current_step != 0 and current_step % args.eval_frequency == 0:
-        dev_step(dev1_x, dev1_y, "dev1")
-        dev_step(dev2_x, dev2_y, "dev2")
+        dev_step(dev1_x[0:1024], dev1_y[0:1024], "dev1")
+        dev_step(dev2_x[0:1024], dev2_y[0:1024], "dev2")
 
 def main():
   if args.mode == 'train':
